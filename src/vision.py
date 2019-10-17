@@ -1,8 +1,14 @@
 import numpy as np
-import matplotlib
+import matplotlib #?
+import glob
+import time
+import os
 import cv2
+from sklearn.model_selection import train_test_split
 
-# from https://techtutorialsx.com/2018/06/02/python-opencv-converting-an-image-to-gray-scale/ 
+# TODO: make a neural network ....
+
+# from https://techtutorialsx.com/2018/06/02/python-opencv-converting-an-image-to-gray-scale/
 def grey_image():
     #print(cv2.__version__)
     image = cv2.imread("drivingpov.jpg")
@@ -21,35 +27,35 @@ def grey_video():
 
     while True:
         ret, frame = capture.read()
- 
+
         grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-     
+
         cv2.imshow('video gray', grayFrame)
         cv2.imshow('video original', frame)
-          
+
         if cv2.waitKey(1) == 27:
             break
-  
+
     capture.release()
     cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    print("Ampeaters")
+    # print("Ampeaters")
     while True:
         x = input("Quit? ")
         if x in ["q", "quit", "Quit", "yes"]:
             quit()
         else:
             #grey_image()
-            grey_video() # press 'esc' to quit the video
-
+            #grey_video() # press 'esc' to quit the video
+            print("lets get that bread")
 
     print("Done")
 
 
 '''
-from https://pypi.org/project/opencv-python/ 
+from https://pypi.org/project/opencv-python/
 
 a. Packages for standard desktop environments (Windows, macOS, almost any GNU/Linux distribution)
 
