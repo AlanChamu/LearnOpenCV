@@ -8,17 +8,49 @@ import matplotlib.pyplot as plt
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
 #step 1 convert image to graycscale
-def detect_lane():
-    print("Starting")
-    #image = cv2.imread('test2.mp4')
-    image = cv2.imread('drivingpov.jpg')
-    lane_image = np.copy(image)
-    #create a greyscale video
-    gray = cv2.cvtColor(lane_image, cv2.COLOR_RGB2GRAY) #flag to turn gray
-    cv2.imshow("result", gray)
-    cv2.waitKey(0)
+# def detect_lane():
+#     print("Starting")
+#     #image = cv2.imread('test2.mp4')
+#     image = cv2.imread('drivingpov.jpg')
+#     lane_image = np.copy(image)
+#     #create a greyscale video
+#     gray = cv2.cvtColor(lane_image, cv2.COLOR_RGB2GRAY) #flag to turn gray
+#     cv2.imshow("result", gray)
+#     cv2.waitKey(0)
 
 #step 3 Canny method edge detection algorithm
+
+def make_coordinates(image, line_parameters):
+    slope, intercept = line_parameters
+    y1 = image.shape[0]
+    # why do we have to convert to int?
+    y2 = int(y1*(3/5))
+    x1 = int((y1 - intercept)/slope)
+    x2 = int((y2 - intercept)/slope)
+
+    return np.array([x1, y1, x2, y2])
+
+def average_slope_intercept(image, lines):
+    left_fit = []
+    right_fit = []
+    # what does line.reshape(4) do?
+    for line in lines:
+        x1, y1, x2, y2 = line.reshape(4)
+        parameters = np.polyfit((x1, x2), (y1, y2), 1)
+        slope = parameters[0]
+        intercept = parameters[1]
+        if slope < 0:
+            left_fit.append((slope, intercept))
+        else:
+            right_fit.append((slope, intercept))
+
+    left_fit_average = np.average(left_fit, axis=0)
+    right_fit_average = np.average(right_fit, axis=0)
+
+    left_line = make_coordinates(image, left_fit_average)
+    right_line = make_coordinates(image, right_fit_average)
+
+    return np.array([left_line, right_line])
 
 # more about Canny algorithm here:
 # https://docs.opencv.org/trunk/da/d22/tutorial_py_canny.html
@@ -48,30 +80,54 @@ def region_of_interest(image):
 def display_lines(image, lines):
     line_image = np.zeros_like(image)
     if lines is not None:
-        for line in lines:
-            x1, y1, x2, y2 = line.reshape(4)
+        for x1, y1, x2, y2 in lines:
+            # x1, y1, x2, y2 = line.reshape(4)
             cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
             # specify where you want it to be drawn, and color
     return line_image
 
 #step 2 apply a gaussian blur to reduce noise
 def detect_lane2():
+    '''
     image = cv2.imread('test2.jpg')
-
     lane_image = np.copy(image)
-    # cv2.imshow("result", gray)
     cannyimg = canny(lane_image)
     cropped_image = region_of_interest(cannyimg)
 
     #why is there a 100 there?
     lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
-    line_image = display_lines(lane_image, lines)
+
+    averaged_lines = average_slope_intercept(lane_image, lines)
+    line_image = display_lines(lane_image, averaged_lines)
     #combines images lines + lane
     # taking the weighted sum to two arrays
     combo_img = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1) # gamma value at end
-    plt.imshow(combo_img)
-    plt.show()
-    # cv2.waitKey(0)
+
+    cv2.imshow("Result", combo_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    '''
+
+    cap = cv2.VideoCapture("test2.mp4")
+    while (cap.isOpened()):
+        _, frame = cap.read()
+        cannyimg = canny(frame)
+        cropped_image = region_of_interest(cannyimg)
+
+        #why is there a 100 there?
+        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+
+        averaged_lines = average_slope_intercept(frame, lines)
+        line_image = display_lines(frame, averaged_lines)
+        #combines images lines + lane
+        # taking the weighted sum to two arrays
+        combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
+
+        cv2.imshow("Result", combo_img)
+        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+            break
+
+    cap.release()
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
@@ -82,7 +138,9 @@ if __name__ == '__main__':
         else:
             # detect_lane()
             detect_lane2()
+            cv2.destroyAllWindows()
 
 #STEPS
-#1.
-#7. finding lanes line - hough transform
+#step 1 convert image to graycscale
+#step 2 finding lanes line - hough transform
+#step 10 find lane lines in video
