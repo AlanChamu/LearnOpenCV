@@ -3,7 +3,6 @@ import cv2
 import matplotlib.pyplot as plt
 
 
-# XXX: left off at 1:04:41
 # finished section for finding + displayig lines on img of lanes
 
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
