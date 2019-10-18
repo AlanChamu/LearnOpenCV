@@ -124,10 +124,11 @@ def detect_lane2():
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
 
         cv2.imshow("Result", combo_img)
-        cv2.waitKey(1) # waits 1 millisecond between frames (if 0, then video will freeze)
+        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+            break
 
+    cap.release()
     cv2.destroyAllWindows()
-
 
 if __name__ == '__main__':
     while True:
@@ -137,6 +138,7 @@ if __name__ == '__main__':
         else:
             # detect_lane()
             detect_lane2()
+            cv2.destroyAllWindows()
 
 #STEPS
 #step 1 convert image to graycscale
