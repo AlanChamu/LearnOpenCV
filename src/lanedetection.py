@@ -7,17 +7,6 @@ import matplotlib.pyplot as plt
 
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
-#step 1 convert image to graycscale
-# def detect_lane():
-#     print("Starting")
-#     #image = cv2.imread('test2.mp4')
-#     image = cv2.imread('drivingpov.jpg')
-#     lane_image = np.copy(image)
-#     #create a greyscale video
-#     gray = cv2.cvtColor(lane_image, cv2.COLOR_RGB2GRAY) #flag to turn gray
-#     cv2.imshow("result", gray)
-#     cv2.waitKey(0)
-
 #step 3 Canny method edge detection algorithm
 
 def make_coordinates(image, line_parameters):
@@ -66,6 +55,7 @@ def canny(image):
 #made 26:00
 def region_of_interest(image):
     height = image.shape[0]
+    # crops the image
     polygons = np.array([
     [(200, height), (1100, height), (550, 200)]
     ])
@@ -108,14 +98,17 @@ def detect_lane2():
     cv2.destroyAllWindows()
     '''
 
-    cap = cv2.VideoCapture("test2.mp4")
+    # cap = cv2.VideoCapture("test2.mp4")
+    cap = cv2.VideoCapture("../videos/video4.mp4")
+
     while (cap.isOpened()):
         _, frame = cap.read()
         cannyimg = canny(frame)
         cropped_image = region_of_interest(cannyimg)
 
         #why is there a 100 there?
-        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
+            100, np.array([]), minLineLength=40, maxLineGap=5)
 
         averaged_lines = average_slope_intercept(frame, lines)
         line_image = display_lines(frame, averaged_lines)
@@ -138,7 +131,7 @@ if __name__ == '__main__':
         else:
             # detect_lane()
             detect_lane2()
-            cv2.destroyAllWindows()
+            # cv2.destroyAllWindows()
 
 #STEPS
 #step 1 convert image to graycscale
