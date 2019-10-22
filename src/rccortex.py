@@ -1,6 +1,9 @@
 # yolov3 https://pjreddie.com/darknet/yolo/
 # source: https://towardsdatascience.com/object-detection-with-less-than-10-lines-of-code-using-python-2d28eebc5b11
 
+# XXX: this code is too slow!
+# XXX: need to make faster
+
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -29,15 +32,28 @@ def handle_traffic(state):
 ref = {'stop sign':handle_stop,
         'traffic light': handle_traffic}
 
+####################### HELPER FUNCTIONS ###################################
+def canny(image): # makes image/video look cool (just black and white)
+    #create a greyscale image
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) #flag to turn gray
+    #GaussianBlur to reduce noise
+    blur = cv2.GaussianBlur(gray, (5, 5), 0) # to reduce noise
+    # Step 3: detect lanes, figure out what Canny method does
+    result = cv2.Canny(blur, 50, 150)
+    return result
+
 def analyze_view():
 
     # vid = cv2.VideoCapture("../videos/video2.mp4")
-    vid = cv2.VideoCapture("../../video4.mp4")
+    vid = cv2.VideoCapture("../../videos/video3.mp4")
 
     while (vid.isOpened()):
         _, frame = vid.read()
         bbox, label, conf = cv.detect_common_objects(frame)
         output_img = draw_bbox(frame, bbox, label, conf)
+        # cannyimg = canny(frame)
+        # cropped_image = region_of_interest(cannyimg)
+
 
         # print("Done Detecting ... ")
         # print(bbox)
