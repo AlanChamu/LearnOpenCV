@@ -1,13 +1,8 @@
+#source: https://www.youtube.com/watch?v=eLTLtUVuuy4
+
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-
-
-# finished section for finding + displayig lines on img of lanes
-
-#source: https://www.youtube.com/watch?v=eLTLtUVuuy4
-
-#step 3 Canny method edge detection algorithm
 
 def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
@@ -98,8 +93,8 @@ def detect_lane2():
     cv2.destroyAllWindows()
     '''
 
-    # cap = cv2.VideoCapture("test2.mp4")
-    cap = cv2.VideoCapture("../videos/video1.mp4")
+    # cap = cv2.VideoCapture("../videos/video1.mp4")
+    cap = cv2.VideoCapture("../../video3.mp4")
 
     while (cap.isOpened()):
         _, frame = cap.read()

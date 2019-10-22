@@ -1,0 +1,80 @@
+# yolov3 https://pjreddie.com/darknet/yolo/
+# source: https://towardsdatascience.com/object-detection-with-less-than-10-lines-of-code-using-python-2d28eebc5b11
+
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import cvlib as cv
+from cvlib.object_detection import draw_bbox
+
+# state will be the cars current state (up, stop, left, right)
+def handle_stop(state):
+    print("IN handle_stop")
+
+    cv2.imshow("Result", state)
+    cv2.waitKey(0)
+    if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+        cv2.destroyAllWindows()
+
+
+def handle_traffic(state):
+    print("IN handle_traffic")
+
+    cv2.imshow("Result", state)
+    cv2.waitKey(0)
+    if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+        cv2.destroyAllWindows()
+
+
+ref = {'stop sign':handle_stop,
+        'traffic light': handle_traffic}
+
+def analyze_view():
+
+    # vid = cv2.VideoCapture("../videos/video2.mp4")
+    vid = cv2.VideoCapture("../../video4.mp4")
+
+    while (vid.isOpened()):
+        _, frame = vid.read()
+        bbox, label, conf = cv.detect_common_objects(frame)
+        output_img = draw_bbox(frame, bbox, label, conf)
+
+        # print("Done Detecting ... ")
+        # print(bbox)
+        # print(label)
+        # print(conf)
+
+        # ref[label[0]](output_img)
+
+        cv2.imshow("Result", output_img)
+        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+            break
+
+    vid.release()
+    cv2.destroyAllWindows()
+
+    # image = cv2.imread('stop.jpg')
+    # image = cv2.imread('greentrafficlight.jpg')
+    # image = cv2.imread('redtrafficlight.jpg')
+'''
+    bbox, label, conf = cv.detect_common_objects(image)
+    output_img = draw_bbox(image, bbox, label, conf)
+
+    print("Done Detecting ... ")
+    print(bbox, label, conf)
+
+    ref[label[0]](output_img)
+'''
+    # plt.imshow(output_img)
+    # plt.show()
+
+    # cv2.imshow("Result", output_img)
+    # cv2.waitKey(0)
+    # if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+    #     cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    analyze_view()
+
+
+# https://pjreddie.com/darknet/yolo/
