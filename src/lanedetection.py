@@ -99,7 +99,7 @@ def detect_lane2():
     '''
 
     # cap = cv2.VideoCapture("test2.mp4")
-    cap = cv2.VideoCapture("../videos/video4.mp4")
+    cap = cv2.VideoCapture("../videos/video1.mp4")
 
     while (cap.isOpened()):
         _, frame = cap.read()
