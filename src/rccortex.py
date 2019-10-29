@@ -3,6 +3,7 @@
 
 # XXX: this code is too slow!
 # XXX: need to make faster
+# figure out how to crop the image/video (1 k by 1k)
 
 import numpy as np
 import cv2
@@ -45,24 +46,21 @@ def canny(image): # makes image/video look cool (just black and white)
 def analyze_view():
 
     # vid = cv2.VideoCapture("../videos/video2.mp4")
-    vid = cv2.VideoCapture("../../videos/video3.mp4")
+    vid = cv2.VideoCapture("../../videos/video1.mp4")
 
     while (vid.isOpened()):
         _, frame = vid.read()
         bbox, label, conf = cv.detect_common_objects(frame)
         output_img = draw_bbox(frame, bbox, label, conf)
-        # cannyimg = canny(frame)
-        # cropped_image = region_of_interest(cannyimg)
-
+        cannyimg = canny(frame)
+        cropped_image = region_of_interest(cannyimg)
 
         # print("Done Detecting ... ")
         # print(bbox)
         # print(label)
         # print(conf)
-
-        # ref[label[0]](output_img)
-
-        cv2.imshow("Result", output_img)
+        
+        cv2.imshow("Result", cropped_image)
         if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
             break
 
