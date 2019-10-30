@@ -1,16 +1,11 @@
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
-# XXX: BETTER VIDEO
+# XXX: TAKE BETTER test footage VIDEO, WITH TURNS
 
 import numpy as np
 import cv2
 # to get numerical values for region_of_interest()
 import matplotlib.pyplot as plt
-
-# XXX: make test footage .mp4 of mock street lane
-#  straight, then a turn, to get information we can work with
-
-# xxx: will try to add a third line in the middle
 
 # dont need to modify this, doesnt make sense to
 def make_coordinates(image, line_parameters):
