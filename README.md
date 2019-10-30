@@ -5,7 +5,7 @@
 ![Lane Before](src/test2.JPG)
 
 ## After
-![Lane_After](src/test2wlanes.JPG)
+![Lane_After](src/test2wlanes.jpg)
 
 ### Dependencies
 
