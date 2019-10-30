@@ -30,7 +30,7 @@ def handle_traffic(state):
         cv2.destroyAllWindows()
 
 
-ref = {'stop sign':handle_stop,
+foo = {'stop sign':handle_stop,
         'traffic light': handle_traffic}
 
 ####################### HELPER FUNCTIONS ###################################
@@ -55,11 +55,6 @@ def analyze_view():
         cannyimg = canny(frame)
         cropped_image = region_of_interest(cannyimg)
 
-        # print("Done Detecting ... ")
-        # print(bbox)
-        # print(label)
-        # print(conf)
-        
         cv2.imshow("Result", cropped_image)
         if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
             break
@@ -77,7 +72,7 @@ def analyze_view():
     print("Done Detecting ... ")
     print(bbox, label, conf)
 
-    ref[label[0]](output_img)
+    foo[label[0]](output_img)
 '''
     # plt.imshow(output_img)
     # plt.show()
@@ -87,8 +82,8 @@ def analyze_view():
     # if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
     #     cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    analyze_view()
+# if __name__ == '__main__':
+#     analyze_view()
 
 
 # https://pjreddie.com/darknet/yolo/
