@@ -1,9 +1,11 @@
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
+# XXX: BETTER VIDEO
+
 import numpy as np
 import cv2
 # to get numerical values for region_of_interest()
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 # XXX: make test footage .mp4 of mock street lane
 #  straight, then a turn, to get information we can work with
@@ -96,17 +98,18 @@ def get_middle_line(lines):
         right = lines[1]
         # middle = np.subtract(right, left)
         # print(middle)
-        temp1 = right[0] - left[0]
-        temp2 = right[2] - left[2]
-        # print(temp1, temp2)
-        # for x1, y1, x2, y2 in lines:
-            # xm = x2 - x1
-            # ym = y2 - y1
-            # temp = (xm, ym, xm, ym)
-            # middle = (x2, y2, x1, y1)
-            # right = ()
 
-    return np.array([np.array([temp2, 720, temp1, 432]),
+        # diff = right[3] - left[3]
+        diff = right[0] - left[0]
+
+        temp1 = diff
+        temp2 = temp1
+
+        print("diff=", diff)
+        # temp1 = right[0] - left[0]
+        # temp2 = right[2] - left[2]
+
+    return np.array([np.array([temp1, 720, temp2, 432]),
                     np.array([temp1, 720, temp2, 432])])
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]
@@ -119,6 +122,42 @@ def detect_lane_from_video(video):
     while (cap.isOpened()):
         _, frame = cap.read()
 
+        cannyimg = canny(frame)
+        # cropped_image = region_of_interest(cannyimg)
+
+        lines = cv2.HoughLinesP(cannyimg, 2, np.pi/180,
+            100, np.array([]), minLineLength=40, maxLineGap=5)
+
+        averaged_lines = average_slope_intercept(frame, lines)
+
+        line_image = display_lines(frame, averaged_lines, (255, 0, 0))
+        #combines images lines + lane
+        # taking the weighted sum to two arrays
+
+        combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
+
+        middle_line = get_middle_line(averaged_lines)
+
+        # what is middle line returning?
+        new_line = display_lines(combo_img, middle_line, (0, 0, 255))
+        final_img = cv2.addWeighted(frame, 0.8, new_line, 1, 1)
+
+        cv2.imshow("Result", final_img)
+        # plt.imshow(final_img)
+        # plt.show()
+
+        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+#STEPS
+#step 1 convert image to graycscale
+#step 2 finding lanes line - hough transform
+#step 10 find lane lines in video
+
+'''
         # computes gradient in all directions of the blurred frame
         # gets the "edges" in the image
         cannyimg = canny(frame)
@@ -150,18 +189,7 @@ def detect_lane_from_video(video):
         final_img = cv2.addWeighted(frame, 0.8, new_line, 1, 1)
 
         cv2.imshow("Result", final_img)
-
-        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-#STEPS
-#step 1 convert image to graycscale
-#step 2 finding lanes line - hough transform
-#step 10 find lane lines in video
-
+'''
 
 # for images
 def detect_lane_from_image(image):

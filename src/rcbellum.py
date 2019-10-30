@@ -16,9 +16,9 @@ import lanedetection
 
 def main():
     print("Starting rcbellum.py ...")
-    video = "video1.mp4"
+    # video = "video1.mp4"
+    video = "custom1.mp4"
     lanedetection.detect_lane_from_video(video)
-
 
 if __name__ == '__main__':
     while True:
