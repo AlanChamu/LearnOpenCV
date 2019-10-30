@@ -10,6 +10,7 @@ import cv2
 
 # xxx: will try to add a third line in the middle
 
+# dont need to modify this, doesnt make sense to
 def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
     y1 = image.shape[0]
@@ -31,6 +32,7 @@ def average_slope_intercept(image, lines):
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
         slope = parameters[0]
         intercept = parameters[1]
+
         if slope < 0:
             left_fit.append((slope, intercept))
         else:
@@ -43,7 +45,6 @@ def average_slope_intercept(image, lines):
     left_line = make_coordinates(image, left_fit_average)
     right_line = make_coordinates(image, right_fit_average)
 
-    # print(left_line, right_line)
     return np.array([left_line, right_line])
 
 # 19:00
@@ -75,37 +76,40 @@ def region_of_interest(image):
 #now to make just the polygon display in front of the lanes
 
 # now display lines in front of lanes
-def display_lines(image, lines):
+def display_lines(image, lines, color): # color is a three int tuple
     line_image = np.zeros_like(image)
     if lines is not None:
         for x1, y1, x2, y2 in lines:
-            # x1, y1, x2, y2 = line.reshape(4)
             # last equals line thickness, 2nd to last is color BGR
-            cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
+            cv2.line(line_image, (x1, y1), (x2, y2), color, 10)
             # specify where you want it to be drawn, and color
     return line_image
 
-def detect_lane_from_image(image):
-        image = cv2.imread(image)
-        lane_image = np.copy(image)
-        cannyimg = canny(lane_image)
-        cropped_image = region_of_interest(cannyimg)
+def get_middle_line(lines):
+    middle_line = []
+    print("in get_middle_line")
+    print(lines[0])
+    print(lines[1])
 
-        # why is there a 100 there?
-        # This does the whole shabang, gets the points of interest
-        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
-            np.array([]), minLineLength=40, maxLineGap=5)
+    if lines is not None:
+        left = lines[0]
+        right = lines[1]
+        # middle = np.subtract(right, left)
+        # print(middle)
+        temp1 = right[0] - left[0]
+        temp2 = right[2] - left[2]
+        # print(temp1, temp2)
+        # for x1, y1, x2, y2 in lines:
+            # xm = x2 - x1
+            # ym = y2 - y1
+            # temp = (xm, ym, xm, ym)
+            # middle = (x2, y2, x1, y1)
+            # right = ()
 
-        
-        averaged_lines = average_slope_intercept(lane_image, lines)
-        line_image = display_lines(lane_image, averaged_lines)
-        #combines images lines + lane
-        # taking the weighted sum to two arrays
-        combo_img = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1) # gamma value at end
-
-        cv2.imshow("Result", combo_img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+    return np.array([np.array([temp2, 720, temp1, 432]),
+                    np.array([temp1, 720, temp2, 432])])
+    #  have to return something like [[(x1, y1),(x2, y2)],
+    #                                   [(x1, y1), (x2, y2)]]
 
 #step 2 apply a gaussian blur to reduce noise
 def detect_lane_from_video(video):
@@ -131,15 +135,21 @@ def detect_lane_from_video(video):
         #
         averaged_lines = average_slope_intercept(frame, lines)
 
-        line_image = display_lines(frame, averaged_lines)
+        line_image = display_lines(frame, averaged_lines, (255, 0, 0))
         #combines images lines + lane
         # taking the weighted sum to two arrays
 
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
-        cv2.imshow("Result", combo_img)
-        # dont relaly need to combine images, not unless you want to make it look cool
+        # cv2.imshow("Result", combo_img)
+        # dont really need to combine images, not unless you want to make it look cool
 
-        # cv2.imshow("Result", line_image)
+        middle_line = get_middle_line(averaged_lines)
+
+        # what is middle line returning?
+        new_line = display_lines(combo_img, middle_line, (0, 0, 255))
+        final_img = cv2.addWeighted(frame, 0.8, new_line, 1, 1)
+
+        cv2.imshow("Result", final_img)
 
         if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
             break
@@ -151,3 +161,32 @@ def detect_lane_from_video(video):
 #step 1 convert image to graycscale
 #step 2 finding lanes line - hough transform
 #step 10 find lane lines in video
+
+
+# for images
+def detect_lane_from_image(image):
+        image = cv2.imread(image)
+        lane_image = np.copy(image)
+        cannyimg = canny(lane_image)
+        cropped_image = region_of_interest(cannyimg)
+
+        # why is there a 100 there?
+        # This does the whole shabang, gets the points of interest
+        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
+            np.array([]), minLineLength=40, maxLineGap=5)
+
+        # XXX: going to make a third line in the middle
+
+        averaged_lines = average_slope_intercept(lane_image, lines)
+
+        line_image = display_lines(lane_image, averaged_lines)
+        #combines images lines + lane
+        # taking the weighted sum to two arrays
+        combo_img = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1) # gamma value at end
+        cv2.imshow("Result", combo_img)
+
+        # middle_line = get_middle_line(combo_img, averaged_lines)
+        # final_img = cv2.addWeighted(combo_img, 0.8, middle_line, 1, 1)
+        # cv2.imshow("Result", final_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
