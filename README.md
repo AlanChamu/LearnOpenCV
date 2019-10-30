@@ -2,10 +2,10 @@
 
 
 ## Before
-![Lane Image](src/test2.JPG)
+![Lane Before](src/test2.JPG)
 
 ## After
-![Fig 1](src/test2wlanes.JPG)
+![Lane_After](src/test2wlanes.JPG)
 
 ### Dependencies
 
