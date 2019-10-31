@@ -11,11 +11,12 @@ def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
     print("In make_coordinates,", image, line_parameters)
     y1 = image.shape[0]
+    print("y1,", y1)
     # why do we have to convert to int?
     y2 = int(y1*(3/5))
     x1 = int((y1 - intercept)/slope)
     x2 = int((y2 - intercept)/slope)
-
+    print("array,", [x1, y1, x2, y2])
     return np.array([x1, y1, x2, y2])
 
 def average_slope_intercept(image, lines):
