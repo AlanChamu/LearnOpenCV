@@ -91,21 +91,17 @@ def get_middle_line(lines):
     if lines is not None:
         left = lines[0]
         right = lines[1]
-        # middle = np.subtract(right, left)
-        # print(middle)
 
-        # diff = right[3] - left[3]
-        diff = right[0] - left[0]
+        diff = (right[2] - left[2])/2
 
-        temp1 = diff
+        temp1 = int(diff) + left[2]
         temp2 = temp1
 
         print("diff=", diff)
-        # temp1 = right[0] - left[0]
-        # temp2 = right[2] - left[2]
 
     return np.array([np.array([temp1, 720, temp2, 432]),
                     np.array([temp1, 720, temp2, 432])])
+
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]
 
@@ -118,26 +114,33 @@ def detect_lane_from_video(video):
         _, frame = cap.read()
 
         cannyimg = canny(frame)
-        # cropped_image = region_of_interest(cannyimg)
+        cropped_image = region_of_interest(cannyimg)
 
-        lines = cv2.HoughLinesP(cannyimg, 2, np.pi/180,
+        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
             100, np.array([]), minLineLength=40, maxLineGap=5)
 
         averaged_lines = average_slope_intercept(frame, lines)
 
-        line_image = display_lines(frame, averaged_lines, (255, 0, 0))
-        #combines images lines + lane
+
+        
+        middle_line = get_middle_line(averaged_lines)
+
+
+        line_image = display_lines(frame, middle_line, (255, 0, 0))
+        # line_image = display_lines(frame, averaged_lines, (255, 0, 0))
+
+        # combines images lines + lane
         # taking the weighted sum to two arrays
 
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
 
-        middle_line = get_middle_line(averaged_lines)
+        # middle_line = get_middle_line(averaged_lines)
+        #
+        # # what is middle line returning?
+        # new_line = display_lines(combo_img, middle_line, (0, 0, 255))
+        # final_img = cv2.addWeighted(frame, 0.8, new_line, 1, 1)
 
-        # what is middle line returning?
-        new_line = display_lines(combo_img, middle_line, (0, 0, 255))
-        final_img = cv2.addWeighted(frame, 0.8, new_line, 1, 1)
-
-        cv2.imshow("Result", final_img)
+        cv2.imshow("Result", combo_img)
         # plt.imshow(final_img)
         # plt.show()
 
