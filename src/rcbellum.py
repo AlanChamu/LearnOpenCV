@@ -17,9 +17,10 @@ import lanedetection
 
 def main():
     print("Starting rcbellum.py ...")
-    video = "video1.mp4"
-    # video = "custom1.mp4"
-
+    # video = "video1.mp4"
+    # video = "custom1.mp4"  # not good
+    video = "custom2.mp4"
+    # video = "custom3.mp4"
     try:
         lanedetection.detect_lane_from_video(video)
     except Exception as exc:

@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
+    print("In make_coordinates,", image, line_parameters)
     y1 = image.shape[0]
     # why do we have to convert to int?
     y2 = int(y1*(3/5))
@@ -18,12 +19,11 @@ def make_coordinates(image, line_parameters):
     return np.array([x1, y1, x2, y2])
 
 def average_slope_intercept(image, lines):
-    # print("In average_slope_intercept ... ")
+    print("In average_slope_intercept ... ")
     left_fit = []
     right_fit = []
-    # what does line.reshape(4) do?
+
     for line in lines:
-    # for x1, y1, x2, y2 in lines:
         x1, y1, x2, y2 = line.reshape(4)
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
         slope = parameters[0]
@@ -34,13 +34,13 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
-    # can we use this?
+    # print("here?")
     left_fit_average = np.average(left_fit, axis=0)
     right_fit_average = np.average(right_fit, axis=0)
-
+    # print("here?")
     left_line = make_coordinates(image, left_fit_average)
     right_line = make_coordinates(image, right_fit_average)
-
+    print("here?")
     return np.array([left_line, right_line])
 
 def canny(image):
@@ -58,13 +58,14 @@ def canny(image):
 def region_of_interest(image):
     height = image.shape[0]
 
-    # polygons = np.array([
-    # [(250, height), (1500, height), (100, 0)]
-    # ])
-
     polygons = np.array([
-    [(200, height), (1100, height), (550, 200)]
+    [(500, height), (1250, height), (800, 0)]
     ])
+
+    # for test mp4 file from tutorial
+    # polygons = np.array([
+    # [(200, height), (1100, height), (550, 200)]
+    # ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
@@ -84,8 +85,10 @@ def display_lines(image, lines, color): # color is a three int tuple
     return line_image
 
 def get_middle_line(lines):
-    middle_line = []
     print("in get_middle_line")
+
+    top = []
+    bottom = []
 
     if lines is not None:
         print(lines[0])
@@ -104,8 +107,10 @@ def get_middle_line(lines):
         print("top_diff=", top_diff)
         print("bottom_diff=", bottom_diff)
 
-    return np.array([np.array([temp1, 720, temp2, 432]),
-                    np.array([temp1, 720, temp2, 432])])
+        top = np.array([temp1, 720, temp2, 432])
+        bottom = np.array([temp1, 720, temp2, 432])
+
+    return np.array([top,bottom])
 
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]
@@ -116,23 +121,24 @@ def detect_lane_from_video(video):
 
     while (cap.isOpened()):
         _, frame = cap.read()
-
+        print("one")
         cannyimg = canny(frame)
+        print("two")
         cropped_image = region_of_interest(cannyimg)
-
+        print("three")
         lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
             100, np.array([]), minLineLength=40, maxLineGap=5)
-
+        print("four")
         averaged_lines = average_slope_intercept(frame, lines)
-
+        print("five")
         # may have to return an angle value to allow car to turn directions
         middle_line = get_middle_line(averaged_lines)
-
+        print("six")
         line_image = display_lines(frame, middle_line, (255, 0, 0))
         # line_image = display_lines(frame, averaged_lines, (255, 0, 0))
-
+        print("seven")
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
-
+        print("eight")
         cv2.imshow("Result", combo_img)
         # plt.imshow(combo_img)
         # plt.show()
