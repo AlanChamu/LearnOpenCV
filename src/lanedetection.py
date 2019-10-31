@@ -8,16 +8,25 @@ import cv2
 import matplotlib.pyplot as plt
 
 def make_coordinates(image, line_parameters):
-    slope, intercept = line_parameters
     print("In make_coordinates,", image, line_parameters)
-    y1 = image.shape[0]
-    print("y1,", y1)
-    # why do we have to convert to int?
-    y2 = int(y1*(3/5))
-    x1 = int((y1 - intercept)/slope)
-    x2 = int((y2 - intercept)/slope)
-    print("array,", [x1, y1, x2, y2])
-    return np.array([x1, y1, x2, y2])
+
+    # result = []
+    try:
+        slope, intercept = line_parameters
+        y1 = image.shape[0]
+        print("y1,", y1)
+        # why do we have to convert to int?
+        y2 = int(y1*(3/5))
+        x1 = int((y1 - intercept)/slope)
+        x2 = int((y2 - intercept)/slope)
+        print("array,", [x1, y1, x2, y2])
+        return np.array([x1, y1, x2, y2])
+    except Exception as exc:
+        print("Oops,",exc)
+        # return None
+        # TEMPORARY FIX
+        return np.array([0, 0, 0, 0])
+    # finally:
 
 def average_slope_intercept(image, lines):
     print("In average_slope_intercept ... ")
@@ -40,8 +49,12 @@ def average_slope_intercept(image, lines):
     right_fit_average = np.average(right_fit, axis=0)
     # print("here?")
     left_line = make_coordinates(image, left_fit_average)
+    print("break 1")
     right_line = make_coordinates(image, right_fit_average)
-    print("here?")
+    print("break 2")
+
+    # HAVE TO MAKE COMPATIBLE IF make_coordinates RETURNS A None
+    # BETTER YET, WHY IS THERE AN ISSUE IN make_coordinates?
     return np.array([left_line, right_line])
 
 def canny(image):
@@ -59,14 +72,14 @@ def canny(image):
 def region_of_interest(image):
     height = image.shape[0]
 
-    polygons = np.array([
-    [(500, height), (1250, height), (800, 0)]
-    ])
+    # polygons = np.array([
+    # [(500, height), (1000, height), (800, 0)]
+    # ])
 
     # for test mp4 file from tutorial
-    # polygons = np.array([
-    # [(200, height), (1100, height), (550, 200)]
-    # ])
+    polygons = np.array([
+    [(200, height), (1100, height), (550, 200)]
+    ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
@@ -115,40 +128,6 @@ def get_middle_line(lines):
 
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]
-
-def detect_lane_from_video(video):
-
-    cap = cv2.VideoCapture("../../videos/"+video)
-
-    while (cap.isOpened()):
-        _, frame = cap.read()
-        print("one")
-        cannyimg = canny(frame)
-        print("two")
-        cropped_image = region_of_interest(cannyimg)
-        print("three")
-        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-            100, np.array([]), minLineLength=40, maxLineGap=5)
-        print("four")
-        averaged_lines = average_slope_intercept(frame, lines)
-        print("five")
-        # may have to return an angle value to allow car to turn directions
-        middle_line = get_middle_line(averaged_lines)
-        print("six")
-        line_image = display_lines(frame, middle_line, (255, 0, 0))
-        # line_image = display_lines(frame, averaged_lines, (255, 0, 0))
-        print("seven")
-        combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
-        print("eight")
-        cv2.imshow("Result", combo_img)
-        # plt.imshow(combo_img)
-        # plt.show()
-
-        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 #STEPS
 #step 1 convert image to graycscale
