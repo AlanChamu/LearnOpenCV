@@ -9,6 +9,7 @@
 import os
 import time
 import serial
+import cv2
 # from rccortex import*
 # import rccortex
 import lanedetection
@@ -18,12 +19,20 @@ def main():
     print("Starting rcbellum.py ...")
     video = "video1.mp4"
     # video = "custom1.mp4"
-    lanedetection.detect_lane_from_video(video)
+
+    try:
+        lanedetection.detect_lane_from_video(video)
+    except Exception as exc:
+        print("Noooo,", exc)
+        # cap.release()
+        cv2.destroyAllWindows()
+    finally:
+        print("Done")
+
 
 if __name__ == '__main__':
-    while True:
-        x = input("Quit? ")
-        if x in ["q", "quit", "Quit", "yes"]:
-            quit()
-        else:
-            main()
+    x = input("Quit? ")
+    if x in ["q", "quit", "Quit", "yes"]:
+        quit()
+    else:
+        main()
