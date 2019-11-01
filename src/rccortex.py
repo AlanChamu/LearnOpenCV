@@ -2,17 +2,9 @@
 # source: https://towardsdatascience.com/object-detection-with-less-than-10-lines-of-code-using-python-2d28eebc5b11
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
-# XXX: this code is too slow!
-# XXX: need to make faster
-# figure out how to crop the image/video (1 k by 1k)
-
 import cv2
 import numpy as np
-
-# to detect lanes
-# import lanedetection
 import matplotlib.pyplot as plt
-# import tesla
 
 # for the nn
 # import tesla
@@ -22,44 +14,34 @@ import matplotlib.pyplot as plt
 # from cvlib.object_detection import draw_bbox
 # https://pjreddie.com/darknet/yolo/
 
-
-
-# XXX: TAKE BETTER test footage VIDEO, WITH TURNS
-
-# import numpy as np
-# import cv2
-# to get numerical values for region_of_interest()
-# import matplotlib.pyplot as plt
-
 def make_coordinates(image, line_parameters):
-    print("In make_coordinates,", image, line_parameters)
-
-    # result = []
+    # print("In make_coordinates,", image, line_parameters)
     try:
         slope, intercept = line_parameters
         y1 = image.shape[0]
-        print("y1,", y1)
+        # print("y1,", y1)
         # why do we have to convert to int?
         y2 = int(y1*(3/5))
         x1 = int((y1 - intercept)/slope)
         x2 = int((y2 - intercept)/slope)
-        print("array,", [x1, y1, x2, y2])
+        # print("array,", [x1, y1, x2, y2])
         return np.array([x1, y1, x2, y2])
     except Exception as exc:
         print("Oops,",exc)
         # return None
-        # TEMPORARY FIX
         return np.array([0, 0, 0, 0])
-    # finally:
 
 def average_slope_intercept(image, lines):
     print("In average_slope_intercept ... ")
     left_fit = []
     right_fit = []
 
+    print("here?")
     for line in lines:
         x1, y1, x2, y2 = line.reshape(4)
+
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
+
         slope = parameters[0]
         intercept = parameters[1]
 
@@ -68,17 +50,17 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
-    # print("here?")
     left_fit_average = np.average(left_fit, axis=0)
+    print("or here?")
     right_fit_average = np.average(right_fit, axis=0)
-    # print("here?")
     left_line = make_coordinates(image, left_fit_average)
-    print("break 1")
+    # print("break 1")
     right_line = make_coordinates(image, right_fit_average)
-    print("break 2")
+    # print("break 2")
 
     # HAVE TO MAKE COMPATIBLE IF make_coordinates RETURNS A None
     # BETTER YET, WHY IS THERE AN ISSUE IN make_coordinates?
+    print("out of average_slope_intercept ... ")
     return np.array([left_line, right_line])
 
 def canny(image):
@@ -97,10 +79,10 @@ def region_of_interest(image):
     height = image.shape[0]
 
     polygons = np.array([
-    [(500, height), (1000, height), (800, 0)]
+    [(500, height), (1100, height), (800, 200)]
     ])
 
-    # for test mp4 file from tutorial
+    # # for test mp4 file from tutorial
     # polygons = np.array([
     # [(200, height), (1100, height), (550, 200)]
     # ])
@@ -152,60 +134,3 @@ def get_middle_line(lines):
 
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]
-
-# state will be the cars current state (up, stop, left, right)
-def handle_stop(state):
-    print("IN handle_stop")
-
-    cv2.imshow("Result", state)
-    cv2.waitKey(0)
-    if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-        cv2.destroyAllWindows()
-
-
-def handle_traffic(state):
-    print("IN handle_traffic")
-
-    cv2.imshow("Result", state)
-    cv2.waitKey(0)
-    if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-        cv2.destroyAllWindows()
-
-
-foo = {'stop sign':handle_stop,
-        'traffic light': handle_traffic}
-
-def detect_lane_from_video(video):
-
-    cap = cv2.VideoCapture("../../videos/"+video)
-
-    while (cap.isOpened()):
-        _, frame = cap.read()
-        print("one")
-        cannyimg = canny(frame)
-        print("two")
-        cropped_image = region_of_interest(cannyimg)
-        print("three")
-        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-            100, np.array([]), minLineLength=40, maxLineGap=5)
-        print("four")
-        averaged_lines = average_slope_intercept(frame, lines)
-        print("five")
-        # may have to return an angle value to allow car to turn directions
-        middle_line = get_middle_line(averaged_lines)
-        print("six")
-        line_image = display_lines(frame, middle_line, (255, 0, 0))
-        # line_image = display_lines(frame, averaged_lines, (255, 0, 0))
-        print("seven")
-        combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
-        print("eight")
-
-        cv2.imshow("Result", combo_img)
-        # plt.imshow(combo_img)
-        # plt.show()
-
-        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
