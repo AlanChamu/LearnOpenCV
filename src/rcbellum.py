@@ -6,6 +6,10 @@
 
 # source: https://pythonforundergradengineers.com/python-arduino-LED.html
 
+
+# XXX: NEED TO TAKE BETTER VIDEOS
+#  lanes must be centered, on a smooth background
+
 import cv2
 import numpy as np
 import rccortex
@@ -51,38 +55,45 @@ def drive_left(tesla):
 def drive_right(tesla):
     pass
 ###############################################################################
-def detect_lane_from_video(video, tesla):
+def detect_lane_from_video(video, tesla, detect=False):
 
     cap = cv2.VideoCapture("../../videos/"+video)
 
     while (cap.isOpened()):
         _, frame = cap.read()
         # print("one")
-        previous = []
-        temp = []
+
+        if (detect):
+            rccortex.detect_objects(cap, video)
+            break
+
+        previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
+        temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
+
         cannyimg = rccortex.canny(frame)
         # print("two")
         cropped_image = rccortex.region_of_interest(cannyimg)
         # print("three")
         # CHANGED maxLineGap=5 TO maxLineGap=10 AND THE VIDEO DIDNT CRASH!
         lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-            100, np.array([]), minLineLength=40, maxLineGap=10)
+            100, np.array([]), minLineLength=40, maxLineGap=100)
 
         print("four")
 
         averaged_lines = rccortex.average_slope_intercept(frame, lines)
-        previous = averaged_lines
 
         if averaged_lines is None:
             averaged_lines = previous
 
+        previous = averaged_lines
+
         print("five")
         middle_line = rccortex.get_middle_line(averaged_lines)
-        temp = middle_line
 
         if middle_line is None:
             middle_line = temp
 
+        temp = middle_line
         print("six")
         #################### major key ################################
         dirx, diry = tesla.get_direction()
@@ -123,17 +134,22 @@ def detect_lane_from_video(video, tesla):
 def main(tesla):
     print("Starting rcbellum.py ...")
     # video = "video1.mp4"
+    # video = "video2.mp4"  # DONT USE THIS ONE
+    # video = "croppedvideo3.mp4"
+    video = "video4.mp4"
+    # video = "video5.mp4"
     # video = "custom2.mp4"
     # video = "custom3.mp4"
-    # video = "custom4.mp4"
+    # video = "custom4.mp4" #DONT USE THIS ONE
     # video = "custom5.mp4"
     # video = "custom6.mp4"
     # video = "custom7.mp4"
-    video = "croppedcustom8.mp4"
+    # video = "croppedcustom7.mp4"
+    # video = "croppedcustom8.mp4"
     # video = "custom8.mp4"
     try:
         print(tesla)
-        detect_lane_from_video(video, tesla)
+        detect_lane_from_video(video, tesla, True)
     except Exception as exc:
         print("Noooo,", exc)
         cv2.destroyAllWindows()

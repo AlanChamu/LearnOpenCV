@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 # import tesla
 
 # for object detection
-# import cvlib as cv
-# from cvlib.object_detection import draw_bbox
+import cvlib as cv
+from cvlib.object_detection import draw_bbox
 # https://pjreddie.com/darknet/yolo/
 
 def make_coordinates(image, line_parameters):
@@ -84,7 +84,7 @@ def region_of_interest(image):
 
     # for test mp4 file from tutorial
     polygons = np.array([
-    [(200, height), (900, height), (height, 200)]
+    [(300, height), (800, height), (400, 120)]
     ])
 
     mask = np.zeros_like(image)
@@ -105,34 +105,67 @@ def display_lines(image, lines, color): # color is a three int tuple
     return line_image
 
 def get_middle_line(lines):
-    print("in get_middle_line")
+    print("in get_middle_line,", lines)
 
     top = []
     bottom = []
 
     if lines is None:
         return None
-    else:
-        print(lines[0])
-        print(lines[1])
 
-        left = lines[0]
-        right = lines[1]
+    print(lines[0])
+    print(lines[1])
 
-        top_diff = (right[2] - left[2])/2
-        bottom_diff = (right[0] - left[0])/2
+    left = lines[0]
+    right = lines[1]
 
-        temp2 = int(top_diff) + left[2]
-        temp1 = temp2
-        # temp1 = int(bottom_diff) + left[0]  # will use this to get angle
+    top_diff = (right[2] - left[2])/2
+    bottom_diff = (right[0] - left[0])/2
 
-        print("top_diff=", top_diff)
-        print("bottom_diff=", bottom_diff)
+    temp2 = int(top_diff) + left[2]
+    temp1 = temp2
+    # temp1 = int(bottom_diff) + left[0]  # will use this to get angle
 
-        top = np.array([temp1, 720, temp2, 432])
-        bottom = np.array([temp1, 720, temp2, 432])
+    print("top_diff=", top_diff)
+    print("bottom_diff=", bottom_diff)
+
+    top = np.array([temp1, 720, temp2, 432])
+    bottom = np.array([temp1, 720, temp2, 432])
 
     print("out of get_middle_line")
     return np.array([top,bottom])
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]
+
+def detect_objects(cap, video):
+
+    frames = cv.get_frames("../../videos/"+video)
+
+    for frame in frames:
+        bbox, label, conf = cv.detect_common_objects(frame,
+            confidence=0.25, model='yolov3-tiny')
+
+        out = draw_bbox(frame, bbox, label, conf)
+
+        cv2.imshow("Object Detection", out)
+
+        if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+            break
+
+    cv2.destroyAllWindows()
+
+
+    # while (cap.isOpened()):
+    #     _, frame = cap.read()
+    #
+    #     bbox, label, conf = cv.detect_common_objects(frame)
+    #
+    #     output_image = draw_bbox(frame, bbox, label, conf)
+    #
+    #     cv2.imshow("test", output_image)
+    #
+    #     if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+    #         break
+    #
+    # cap.release()
+    # cv2.destroyAllWindows()
