@@ -36,9 +36,10 @@ def average_slope_intercept(image, lines):
     left_fit = []
     right_fit = []
 
-    print("here?")
+    if lines is None:
+        return None
+
     for line in lines:
-        print("or here?")
         x1, y1, x2, y2 = line.reshape(4)
 
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
@@ -51,8 +52,9 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
+    print("here?")
     left_fit_average = np.average(left_fit, axis=0)
-
+    print("or here?")
     right_fit_average = np.average(right_fit, axis=0)
 
     left_line = make_coordinates(image, left_fit_average)
@@ -80,14 +82,10 @@ def canny(image):
 def region_of_interest(image):
     height = image.shape[0]
 
+    # for test mp4 file from tutorial
     polygons = np.array([
-    [(500, height), (1100, height), (800, 200)]
+    [(200, height), (900, height), (height, 200)]
     ])
-
-    # # for test mp4 file from tutorial
-    # polygons = np.array([
-    # [(200, height), (1100, height), (550, 200)]
-    # ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
@@ -112,7 +110,9 @@ def get_middle_line(lines):
     top = []
     bottom = []
 
-    if lines is not None:
+    if lines is None:
+        return None
+    else:
         print(lines[0])
         print(lines[1])
 
@@ -132,7 +132,7 @@ def get_middle_line(lines):
         top = np.array([temp1, 720, temp2, 432])
         bottom = np.array([temp1, 720, temp2, 432])
 
+    print("out of get_middle_line")
     return np.array([top,bottom])
-
     #  have to return something like [[(x1, y1),(x2, y2)],
     #                                   [(x1, y1), (x2, y2)]]

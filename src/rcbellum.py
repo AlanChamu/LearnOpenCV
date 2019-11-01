@@ -59,6 +59,7 @@ def detect_lane_from_video(video, tesla):
         _, frame = cap.read()
         # print("one")
         previous = []
+        temp = []
         cannyimg = rccortex.canny(frame)
         # print("two")
         cropped_image = rccortex.region_of_interest(cannyimg)
@@ -66,26 +67,23 @@ def detect_lane_from_video(video, tesla):
         # CHANGED maxLineGap=5 TO maxLineGap=10 AND THE VIDEO DIDNT CRASH!
         lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
             100, np.array([]), minLineLength=40, maxLineGap=10)
-        # print("four")
-        # try:
+
+        print("four")
+
         averaged_lines = rccortex.average_slope_intercept(frame, lines)
         previous = averaged_lines
-        # good = True
-        # for line in averaged_lines:
-        #     if line is None:
-        #         previous = averaged_lines
-        #         good = False
 
-        # except Exception as exc:
-        #     good = False
-        #     print("haha,", exc)
+        if averaged_lines is None:
+            averaged_lines = previous
 
-        # print("five")
-        # may have to return an angle value to allow car to turn directions
+        print("five")
+        middle_line = rccortex.get_middle_line(averaged_lines)
+        temp = middle_line
 
-        # if (not good):
-        middle_line = rccortex.get_middle_line(previous)
-        # print("six")
+        if middle_line is None:
+            middle_line = temp
+
+        print("six")
         #################### major key ################################
         dirx, diry = tesla.get_direction()
         print("Direction=", dirx, diry)
@@ -106,9 +104,9 @@ def detect_lane_from_video(video, tesla):
         #     drive_forward()
 
         ##################################################################
-        # line_image = rccortex.display_lines(frame, middle_line, (255, 0, 0))
-        line_image = rccortex.display_lines(frame, averaged_lines, (255, 0, 0))
-        # print("seven")
+        # line_image = rccortex.display_lines(frame, middle_line, (0, 255, 0))
+        line_image = rccortex.display_lines(frame, averaged_lines, (0, 255, 0))
+        print("seven")
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
         # print("eight")
 
@@ -125,9 +123,14 @@ def detect_lane_from_video(video, tesla):
 def main(tesla):
     print("Starting rcbellum.py ...")
     # video = "video1.mp4"
-    # video = "custom1.mp4"  # not good
     # video = "custom2.mp4"
-    video = "custom3.mp4"
+    # video = "custom3.mp4"
+    # video = "custom4.mp4"
+    # video = "custom5.mp4"
+    # video = "custom6.mp4"
+    # video = "custom7.mp4"
+    video = "croppedcustom8.mp4"
+    # video = "custom8.mp4"
     try:
         print(tesla)
         detect_lane_from_video(video, tesla)
