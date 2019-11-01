@@ -38,6 +38,7 @@ def average_slope_intercept(image, lines):
 
     print("here?")
     for line in lines:
+        print("or here?")
         x1, y1, x2, y2 = line.reshape(4)
 
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
@@ -51,8 +52,9 @@ def average_slope_intercept(image, lines):
             right_fit.append((slope, intercept))
 
     left_fit_average = np.average(left_fit, axis=0)
-    print("or here?")
+
     right_fit_average = np.average(right_fit, axis=0)
+
     left_line = make_coordinates(image, left_fit_average)
     # print("break 1")
     right_line = make_coordinates(image, right_fit_average)

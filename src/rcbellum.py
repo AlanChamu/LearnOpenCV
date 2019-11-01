@@ -63,8 +63,9 @@ def detect_lane_from_video(video, tesla):
         # print("two")
         cropped_image = rccortex.region_of_interest(cannyimg)
         # print("three")
+        # CHANGED maxLineGap=5 TO maxLineGap=10 AND THE VIDEO DIDNT CRASH!
         lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-            100, np.array([]), minLineLength=40, maxLineGap=5)
+            100, np.array([]), minLineLength=40, maxLineGap=10)
         # print("four")
         # try:
         averaged_lines = rccortex.average_slope_intercept(frame, lines)
