@@ -47,7 +47,7 @@ def average_slope_intercept(image, lines):
         slope = parameters[0]
         intercept = parameters[1]
 
-        if slope < 0:
+        if slope <= 0:
             left_fit.append((slope, intercept))
         else:
             right_fit.append((slope, intercept))
@@ -84,7 +84,7 @@ def region_of_interest(image):
 
     # for test mp4 file from tutorial
     polygons = np.array([
-    [(300, height), (800, height), (400, 120)]
+    [(0, height), (1000, height), (600, 100)]
     ])
 
     mask = np.zeros_like(image)

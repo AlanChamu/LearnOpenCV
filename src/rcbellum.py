@@ -75,8 +75,11 @@ def detect_lane_from_video(video, tesla, detect=False):
         cropped_image = rccortex.region_of_interest(cannyimg)
         # print("three")
         # CHANGED maxLineGap=5 TO maxLineGap=10 AND THE VIDEO DIDNT CRASH!
-        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-            100, np.array([]), minLineLength=40, maxLineGap=100)
+        # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 200)
+        lines = cv2.HoughLinesP(cropped_image, 1, np.pi/180,
+                100, np.array([]), minLineLength=50, maxLineGap=1)
+        # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
+        #     100, np.array([]), minLineLength=100, maxLineGap=5)
 
         print("four")
 
@@ -136,20 +139,22 @@ def main(tesla):
     # video = "video1.mp4"
     # video = "video2.mp4"  # DONT USE THIS ONE
     # video = "croppedvideo3.mp4"
-    video = "video4.mp4"
+    # video = "video4.mp4"
     # video = "video5.mp4"
     # video = "custom2.mp4"
-    # video = "custom3.mp4"
+    # video = "custom3.p4"
     # video = "custom4.mp4" #DONT USE THIS ONE
     # video = "custom5.mp4"
     # video = "custom6.mp4"
     # video = "custom7.mp4"
     # video = "croppedcustom7.mp4"
     # video = "croppedcustom8.mp4"
-    # video = "custom8.mp4"
+    # video = "croppedcustom10.mp4"
+    video = "croppedcustom11.mp4"
     try:
         print(tesla)
-        detect_lane_from_video(video, tesla, True)
+        detect_lane_from_video(video, tesla)
+        # detect_lane_from_video(video, tesla, True)
     except Exception as exc:
         print("Noooo,", exc)
         cv2.destroyAllWindows()

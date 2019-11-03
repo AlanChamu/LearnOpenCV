@@ -41,6 +41,7 @@ class Tesla(object):
         self.current_direction = newx, newy
 
     # CAN I MAKE A FUNCTION THAT CAN DETECT TURNS?
+
     def __nn__(self):
         pass
         # for future alan, the one who knows how to make a nn and train it
