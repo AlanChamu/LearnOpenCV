@@ -52,9 +52,9 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
-    print("here?")
+    # print("here?")
     left_fit_average = np.average(left_fit, axis=0)
-    print("or here?")
+    # print("or here?")
     right_fit_average = np.average(right_fit, axis=0)
 
     left_line = make_coordinates(image, left_fit_average)
@@ -84,16 +84,14 @@ def region_of_interest(image):
 
     # for test mp4 file from tutorial
     polygons = np.array([
-    [(0, height), (1000, height), (600, 100)]
+    [(200, height), (1200, height), (600, 100)]
     ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
     masked_image = cv2.bitwise_and(image, mask)
     return masked_image
-
-#now to make just the polygon display in front of the lanes
-
+    
 # now display lines in front of lanes
 def display_lines(image, lines, color): # color is a three int tuple
     line_image = np.zeros_like(image)
@@ -105,8 +103,7 @@ def display_lines(image, lines, color): # color is a three int tuple
     return line_image
 
 def get_middle_line(lines):
-    print("in get_middle_line,", lines)
-
+    print("In get_middle_line,")
     top = []
     bottom = []
 
@@ -116,8 +113,7 @@ def get_middle_line(lines):
     print(lines[0])
     print(lines[1])
 
-    left = lines[0]
-    right = lines[1]
+    left, right = lines[0], lines[1]
 
     top_diff = (right[2] - left[2])/2
     bottom_diff = (right[0] - left[0])/2
@@ -132,13 +128,12 @@ def get_middle_line(lines):
     top = np.array([temp1, 720, temp2, 432])
     bottom = np.array([temp1, 720, temp2, 432])
 
-    print("out of get_middle_line")
+    # print("Out of get_middle_line")
     return np.array([top,bottom])
-    #  have to return something like [[(x1, y1),(x2, y2)],
-    #                                   [(x1, y1), (x2, y2)]]
+    #  returns something like [[(x1, y1),(x2, y2)],
+    #                         [(x1, y1), (x2, y2)]]
 
 def detect_objects(cap, video):
-
     frames = cv.get_frames("../../videos/"+video)
 
     for frame in frames:
@@ -153,19 +148,3 @@ def detect_objects(cap, video):
             break
 
     cv2.destroyAllWindows()
-
-
-    # while (cap.isOpened()):
-    #     _, frame = cap.read()
-    #
-    #     bbox, label, conf = cv.detect_common_objects(frame)
-    #
-    #     output_image = draw_bbox(frame, bbox, label, conf)
-    #
-    #     cv2.imshow("test", output_image)
-    #
-    #     if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-    #         break
-    #
-    # cap.release()
-    # cv2.destroyAllWindows()

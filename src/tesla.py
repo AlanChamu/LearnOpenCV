@@ -39,6 +39,7 @@ class Tesla(object):
 
     def set_direction(self, newx, newy):
         self.current_direction = newx, newy
+        # send instructions to arduino
 
     # CAN I MAKE A FUNCTION THAT CAN DETECT TURNS?
 

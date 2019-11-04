@@ -1,12 +1,9 @@
-# This will probably be the main file that gets called
+# This is the  file that will get called
 
 # XXX: this will get info from rccortex.py
 # cerebellum controlls movement and coordination
 # this will communicate with the arduino that will either contorl the rc or car itself
-
 # source: https://pythonforundergradengineers.com/python-arduino-LED.html
-
-
 # XXX: NEED TO TAKE BETTER VIDEOS
 #  lanes must be centered, on a smooth background
 
@@ -41,7 +38,6 @@ def handle_traffic(state):
 foo = {'stop sign':handle_stop,
         'traffic light': handle_traffic}
 
-
 ###############################################################################
 def drive_forward():
     print("Starting drive_forwards() ... ")
@@ -55,72 +51,74 @@ def drive_left(tesla):
 def drive_right(tesla):
     pass
 ###############################################################################
+def update_direction(tesla, path):
+    dirx, diry = tesla.get_direction()
+    print("Direction=", dirx, diry)
+
+    left = path[0]
+    right = path[1]
+    # will have to do some kind of math here
+    # x = Acos(O)
+    # y = Asin(0)
+
+    # XXX: NEED TO DETECT A TURN!
+    # if (turn):
+    #     drive_newdirection()
+    # else:
+    #     drive_forward()
+
+    newdirx, newdiry = dirx, diry
+
+    tesla.set_direction(newdirx, newdiry)
+
+def get_path(averaged_lines):
+    middle_line = []
+    try:
+        middle_line = rccortex.get_middle_line(averaged_lines)
+    except Exception as exc:
+        print("Error in get_path():", exc)
+    return middle_line
+
+def analyze_view(frame):
+    cannyimg = rccortex.canny(frame)
+    print("two")
+    cropped_image = rccortex.region_of_interest(cannyimg)
+    print("three")
+    lines = cv2.HoughLinesP(cropped_image, 1, np.pi/180,
+            100, np.array([]), minLineLength=50, maxLineGap=1)
+    # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
+    #     100, np.array([]), minLineLength=100, maxLineGap=5)
+    print("four")
+    averaged_lines = rccortex.average_slope_intercept(frame, lines)
+
+    # return cropped_image
+    return averaged_lines
+
 def detect_lane_from_video(video, tesla, detect=False):
 
     cap = cv2.VideoCapture("../../videos/"+video)
 
     while (cap.isOpened()):
         _, frame = cap.read()
+
         # print("one")
+        # if (detect):
+        #     rccortex.detect_objects(cap, video)
+        #     break
 
-        if (detect):
-            rccortex.detect_objects(cap, video)
-            break
+        # previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
+        # temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
+        averaged_lines = analyze_view(frame)
 
-        previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
-        temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
-
-        cannyimg = rccortex.canny(frame)
-        # print("two")
-        cropped_image = rccortex.region_of_interest(cannyimg)
-        # print("three")
-        # CHANGED maxLineGap=5 TO maxLineGap=10 AND THE VIDEO DIDNT CRASH!
-        # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 200)
-        lines = cv2.HoughLinesP(cropped_image, 1, np.pi/180,
-                100, np.array([]), minLineLength=50, maxLineGap=1)
-        # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-        #     100, np.array([]), minLineLength=100, maxLineGap=5)
-
-        print("four")
-
-        averaged_lines = rccortex.average_slope_intercept(frame, lines)
-
-        if averaged_lines is None:
-            averaged_lines = previous
-
-        previous = averaged_lines
-
-        print("five")
-        middle_line = rccortex.get_middle_line(averaged_lines)
-
-        if middle_line is None:
-            middle_line = temp
-
-        temp = middle_line
-        print("six")
+        # print("five")
+        path = get_path(averaged_lines)
+        # print("six")
         #################### major key ################################
-        dirx, diry = tesla.get_direction()
-        print("Direction=", dirx, diry)
-
-        # something with middle_line
-        left = middle_line[0]
-        right = middle_line[1]
-        print(left, right)
-        newdirx, newdiry = dirx, diry
-
-        tesla.set_direction(newdirx, newdiry)
-
-        # XXX: NEED TO DETECT A TURN!
-
-        # if (turn):
-        #     drive_newdirection()
-        # else:
-        #     drive_forward()
-
+        update_direction(tesla, path)
         ##################################################################
-        # line_image = rccortex.display_lines(frame, middle_line, (0, 255, 0))
+        # line_image = rccortex.display_lines(frame, path, (0, 255, 0))
         line_image = rccortex.display_lines(frame, averaged_lines, (0, 255, 0))
-        print("seven")
+        # print("seven")
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
         # print("eight")
 
@@ -148,15 +146,14 @@ def main(tesla):
     # video = "custom6.mp4"
     # video = "custom7.mp4"
     # video = "croppedcustom7.mp4"
-    # video = "croppedcustom8.mp4"
+    video = "croppedcustom8.mp4"
     # video = "croppedcustom10.mp4"
-    video = "croppedcustom11.mp4"
+    # video = "croppedcustom11.mp4"
     try:
-        print(tesla)
         detect_lane_from_video(video, tesla)
         # detect_lane_from_video(video, tesla, True)
     except Exception as exc:
-        print("Noooo,", exc)
+        print("ERROR:,", exc)
         cv2.destroyAllWindows()
     finally:
         print("Done")
