@@ -15,7 +15,6 @@ import time     # required to use delay functions
 from tesla import *    # the nn
 import matplotlib.pyplot as plt
 
-
 # state will be the cars current state (up, stop, left, right)
 def handle_stop(state):
     print("IN handle_stop")
@@ -79,22 +78,33 @@ def get_path(averaged_lines):
         print("Error in get_path():", exc)
     return middle_line
 
-def analyze_view(frame):
+def analyze_view(frame, previous):
     cannyimg = rccortex.canny(frame)
     print("two")
     cropped_image = rccortex.region_of_interest(cannyimg)
     print("three")
-    lines = cv2.HoughLinesP(cropped_image, 1, np.pi/180,
-            100, np.array([]), minLineLength=50, maxLineGap=1)
+    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
+            minLineLength=100, maxLineGap=5)
+    # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
+    #         100, np.array([]), minLineLength=100, maxLineGap=5)
     # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
     #     100, np.array([]), minLineLength=100, maxLineGap=5)
+
+    print("LINES:", lines)
+    # could return a NoneType, why?
+    if lines is None:
+        return previous
+
     print("four")
     averaged_lines = rccortex.average_slope_intercept(frame, lines)
-
+    # averaged_lines = rccortex.average_slope_intercept(frame, np.array(lines[0], lines[1]))
+    previous =  averaged_lines
     # return cropped_image
     return averaged_lines
 
 def detect_lane_from_video(video, tesla, detect=False):
+
+    previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
 
     cap = cv2.VideoCapture("../../videos/"+video)
 
@@ -105,16 +115,15 @@ def detect_lane_from_video(video, tesla, detect=False):
         # if (detect):
         #     rccortex.detect_objects(cap, video)
         #     break
-
         # previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
         # temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
-        averaged_lines = analyze_view(frame)
-
-        # print("five")
-        path = get_path(averaged_lines)
-        # print("six")
+        averaged_lines = analyze_view(frame, previous)
+        print("averaged_lines:", averaged_lines)
         #################### major key ################################
-        update_direction(tesla, path)
+        # print("five")
+        # path = get_path(averaged_lines)
+        # print("six")
+        # update_direction(tesla, path)
         ##################################################################
         # line_image = rccortex.display_lines(frame, path, (0, 255, 0))
         line_image = rccortex.display_lines(frame, averaged_lines, (0, 255, 0))
@@ -146,9 +155,9 @@ def main(tesla):
     # video = "custom6.mp4"
     # video = "custom7.mp4"
     # video = "croppedcustom7.mp4"
-    video = "croppedcustom8.mp4"
+    # video = "croppedcustom8.mp4"
     # video = "croppedcustom10.mp4"
-    # video = "croppedcustom11.mp4"
+    video = "croppedcustom11.mp4"
     try:
         detect_lane_from_video(video, tesla)
         # detect_lane_from_video(video, tesla, True)
