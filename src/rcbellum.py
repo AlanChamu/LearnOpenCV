@@ -43,9 +43,6 @@ foo = {'stop sign':handle_stop,
 def drive_forward():
     print("Starting drive_forwards() ... ")
     # NEEDS TO BE CONNECTED TO ARDUINO HERE I GUESS
-    Arduino = serial.Serial('com18', 9600)
-    time.sleep(2)
-
 def drive_left(tesla):
     pass
 # might merge these two
@@ -156,8 +153,18 @@ def detect_lane_from_image(image, tesla):
     if cv2.waitKey(0) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
         cv2.destroyAllWindows()
 
+###############################################################################
+def init_arduino():
+    ser1 = serial.Serial('COM8', 9600)
+    ser1.write('s', encode())
+
+###############################################################################
+
 def main(tesla):
     print("Starting rcbellum.py ...")
+
+    init_arduino()
+
     # video = "video1.mp4"
     # video = "video2.mp4"  # DONT USE THIS ONE
     # video = "croppedvideo3.mp4"
