@@ -80,28 +80,25 @@ def get_path(averaged_lines):
 
 def analyze_view(frame, previous):
     cannyimg = rccortex.canny(frame)
-    print("two")
+    # print("two")
     cropped_image = rccortex.region_of_interest(cannyimg)
-    print("three")
+    # return cropped_image
+    # print("three")
+    # lines = cv2.HoughLinesP(cropped_image, 1, np.pi/180, 100,
+    #     np.array([]), minLineLength=5, maxLineGap=5)
     lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
-            minLineLength=100, maxLineGap=5)
+            np.array([]), minLineLength=10, maxLineGap=10) # works with one middle line
     # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-    #         100, np.array([]), minLineLength=100, maxLineGap=5)
+    #         100, np.array([]), minLineLength=50, maxLineGap=50)
     # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-    #     100, np.array([]), minLineLength=100, maxLineGap=5)
+    #     100, np.array([]), minLineLength=100, maxLineGap=100)
 
     print("LINES:", lines)
-    # could return a NoneType, why?
-    if lines is None:
-        return previous
-
-    print("four")
     averaged_lines = rccortex.average_slope_intercept(frame, lines)
     # averaged_lines = rccortex.average_slope_intercept(frame, np.array(lines[0], lines[1]))
     previous =  averaged_lines
-    # return cropped_image
     return averaged_lines
-
+# ######################################################################
 def detect_lane_from_video(video, tesla, detect=False):
 
     previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
@@ -118,14 +115,14 @@ def detect_lane_from_video(video, tesla, detect=False):
         # previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
         # temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
         averaged_lines = analyze_view(frame, previous)
-        print("averaged_lines:", averaged_lines)
+        # print("averaged_lines:", averaged_lines)
         #################### major key ################################
         # print("five")
         # path = get_path(averaged_lines)
-        # print("six")
         # update_direction(tesla, path)
         ##################################################################
         # line_image = rccortex.display_lines(frame, path, (0, 255, 0))
+        # print("six")
         line_image = rccortex.display_lines(frame, averaged_lines, (0, 255, 0))
         # print("seven")
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
@@ -140,6 +137,23 @@ def detect_lane_from_video(video, tesla, detect=False):
 
     cap.release()
     cv2.destroyAllWindows()
+
+def detect_lane_from_image(image, tesla):
+    previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
+
+    img = cv2.imread("../../pics/"+image, 1)
+
+    averaged_lines = analyze_view(img, previous)
+    print("one")
+    line_image = rccortex.display_lines(img, averaged_lines, (0, 255, 0))
+    print("two")
+    combo_img = cv2.addWeighted(img, 0.8, line_image, 1, 1) # gamma value at end
+    print("three")
+    cv2.imshow("Ampeater View", combo_img)
+    # plt.imshow(img)
+    # plt.show()
+    if cv2.waitKey(0) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
+        cv2.destroyAllWindows()
 
 def main(tesla):
     print("Starting rcbellum.py ...")
@@ -158,8 +172,16 @@ def main(tesla):
     # video = "croppedcustom8.mp4"
     # video = "croppedcustom10.mp4"
     video = "croppedcustom11.mp4"
+    # video = "croppedcustom12.mp4"
+
+    # img = "lanes1.jpg"
+    # img = "lanes2.jpg"
+    # img = "lanes3.jpg"
+    img = "test1.jpg" #from croppedcustom11
+
     try:
-        detect_lane_from_video(video, tesla)
+        detect_lane_from_image(img, tesla)
+        # detect_lane_from_video(video, tesla)
         # detect_lane_from_video(video, tesla, True)
     except Exception as exc:
         print("ERROR:,", exc)

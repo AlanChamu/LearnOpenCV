@@ -5,6 +5,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import math # nan value
 
 # for the nn
 # import tesla
@@ -19,7 +20,6 @@ def make_coordinates(image, line_parameters):
     try:
         slope, intercept = line_parameters
         y1 = image.shape[0]
-        # print("y1,", y1)
         y2 = int(y1*(3/5))
         x1 = int((y1 - intercept)/slope)
         x2 = int((y2 - intercept)/slope)
@@ -34,11 +34,24 @@ def average_slope_intercept(image, lines):
     left_fit = []
     right_fit = []
 
-    for line in lines[0:1]:
+    for line in lines:
         print("line:", line[0])
+
         x1, y1, x2, y2 = line[0].reshape(4)
 
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
+        print("PARAMETERS:", parameters)
+
+        # doesnt work
+        # for r, theta in parameters:
+        #     print(r, theta)
+        #     a = np.cos(theta)
+        #     b = np.sin(theta)
+        #
+        #     x0 = a*r
+        #     y0 = b*r
+        #
+        #     print(a, b, x0, y0)
 
         slope = parameters[0]
         intercept = parameters[1]
@@ -48,19 +61,24 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
-    print("here?")
     left_fit_average = np.average(left_fit, axis=0)
-    print("or here?")
     right_fit_average = np.average(right_fit, axis=0)
 
+    # works!
+    print(left_fit_average, right_fit_average)
+    if (math.isnan(right_fit_average)):
+        print("TURN RIGHT")
+    elif (math.isnan(   left_fit_average)):
+        print("TURN LEFT")
+    else:
+        print("STRAIGHT")
     left_line = make_coordinates(image, left_fit_average)
-    # print("break 1")
     right_line = make_coordinates(image, right_fit_average)
-    # print("break 2")
 
     # HAVE TO MAKE COMPATIBLE IF make_coordinates RETURNS A None
     # BETTER YET, WHY IS THERE AN ISSUE IN make_coordinates?
     print("out of average_slope_intercept ... ")
+    print(left_line, right_line)
     return np.array([left_line, right_line])
 
 def canny(image):
@@ -70,7 +88,7 @@ def canny(image):
     blur = cv2.GaussianBlur(gray, (5, 5), 0) # to reduce noise
     # Step 3: detect lanes, figure out what Canny method does
     # canny applies a 5by5 GaussianBlur either way
-    result = cv2.Canny(blur, 50, 150) # low to high threshold
+    result = cv2.Canny(blur, 50, 200) # low to high threshold
     return result
 
 # focuses HoughLinesP into a certain area in the mp4 file,
@@ -78,10 +96,13 @@ def canny(image):
 def region_of_interest(image):
     height = image.shape[0]
 
-    # for test mp4 file from tutorial
     polygons = np.array([
-    [(0, height), (1000, height), (600, 100), (300, 100)]
+    [(100, height), (1000, height), (900, 0), (200, 0)]
     ])
+
+    # polygons = np.array([
+    # [(0, height), (1000, height), (600, 100), (300, 100)]
+    # ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
