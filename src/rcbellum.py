@@ -15,6 +15,8 @@ import time     # required to use delay functions
 from tesla import *    # the nn
 import matplotlib.pyplot as plt
 
+import sys, os # to get exception line number
+
 # state will be the cars current state (up, stop, left, right)
 def handle_stop(state):
     print("IN handle_stop")
@@ -75,7 +77,7 @@ def get_path(averaged_lines):
     try:
         middle_line = rccortex.get_middle_line(averaged_lines)
     except Exception as exc:
-        print("Error in get_path():", exc)
+        print("Error in rcbellum.get_path():", exc)
     return middle_line
 
 def analyze_view(frame, previous):
@@ -93,7 +95,7 @@ def analyze_view(frame, previous):
     # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
     #     100, np.array([]), minLineLength=100, maxLineGap=100)
 
-    print("LINES:", lines)
+    # print("LINES:", lines)
     averaged_lines = rccortex.average_slope_intercept(frame, lines)
     # averaged_lines = rccortex.average_slope_intercept(frame, np.array(lines[0], lines[1]))
     previous =  averaged_lines
@@ -107,7 +109,6 @@ def detect_lane_from_video(video, tesla, detect=False):
 
     while (cap.isOpened()):
         _, frame = cap.read()
-
         # print("one")
         # if (detect):
         #     rccortex.detect_objects(cap, video)
@@ -144,11 +145,11 @@ def detect_lane_from_image(image, tesla):
     img = cv2.imread("../../pics/"+image, 1)
 
     averaged_lines = analyze_view(img, previous)
-    print("one")
+    # print("one")
     line_image = rccortex.display_lines(img, averaged_lines, (0, 255, 0))
-    print("two")
+    # print("two")
     combo_img = cv2.addWeighted(img, 0.8, line_image, 1, 1) # gamma value at end
-    print("three")
+    # print("three")
     cv2.imshow("Ampeater View", combo_img)
     # plt.imshow(img)
     # plt.show()
@@ -180,14 +181,17 @@ def main(tesla):
     img = "test1.jpg" #from croppedcustom11
 
     try:
-        detect_lane_from_image(img, tesla)
-        # detect_lane_from_video(video, tesla)
+        # detect_lane_from_image(img, tesla)
+        detect_lane_from_video(video, tesla)
         # detect_lane_from_video(video, tesla, True)
     except Exception as exc:
-        print("ERROR:,", exc)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print("Error at rcbellum.main():", exc)
+        print(exc_type, fname, exc_tb.tb_lineno)
         cv2.destroyAllWindows()
     finally:
-        print("Done")
+        print("Goodbye, Thank You!")
 
 if __name__ == '__main__':
     tesla = Tesla()

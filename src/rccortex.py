@@ -2,6 +2,9 @@
 # source: https://towardsdatascience.com/object-detection-with-less-than-10-lines-of-code-using-python-2d28eebc5b11
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
+# XXX: QUESTIONS: how can we make the pi take a
+# video without being connected to a laptop/desktop
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +18,7 @@ import cvlib as cv
 from cvlib.object_detection import draw_bbox
 # https://pjreddie.com/darknet/yolo/
 
-def make_coordinates(image, line_parameters):
+def make_coordinates(image, line_parameters, direction):
     # print("In make_coordinates,", image, line_parameters)
     try:
         slope, intercept = line_parameters
@@ -23,24 +26,24 @@ def make_coordinates(image, line_parameters):
         y2 = int(y1*(3/5))
         x1 = int((y1 - intercept)/slope)
         x2 = int((y2 - intercept)/slope)
-        print("array,", [x1, y1, x2, y2])
+        # print("array,", [x1, y1, x2, y2])
+        # print("STRAIGHT")
         return np.array([x1, y1, x2, y2])
     except Exception as exc:
-        print("Oops,",exc)
+        # print("Error in rccortex.make_coordinates():",exc)
+        print(direction)
         return np.array([0, 0, 0, 0])
 
-def average_slope_intercept(image, lines):
-    print("In average_slope_intercept ... ")
-    left_fit = []
-    right_fit = []
+def average_slope_intercept_helper(lines):
+    left_fit, right_fit = [], []
 
     for line in lines:
-        print("line:", line[0])
+        # print("line:", line[0])
 
         x1, y1, x2, y2 = line[0].reshape(4)
 
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
-        print("PARAMETERS:", parameters)
+        # print("PARAMETERS:", parameters)
 
         # doesnt work
         # for r, theta in parameters:
@@ -61,24 +64,43 @@ def average_slope_intercept(image, lines):
         else:
             right_fit.append((slope, intercept))
 
+    # print("Out of helper")
+    return left_fit, right_fit
+
+
+
+def average_slope_intercept(image, lines):
+    # print("In average_slope_intercept ... ")
+    left_fit, right_fit = [], []
+
+    # try:
+    left_fit, right_fit = average_slope_intercept_helper(lines)
+    # except Exception as exc:
+    #     print("Error in rccortex.average_slope_intercept():", exc)
     left_fit_average = np.average(left_fit, axis=0)
+
     right_fit_average = np.average(right_fit, axis=0)
 
+    # major key, turn detection
     # works!
-    print(left_fit_average, right_fit_average)
-    if (math.isnan(right_fit_average)):
-        print("TURN RIGHT")
-    elif (math.isnan(   left_fit_average)):
-        print("TURN LEFT")
-    else:
+    # print(left_fit_average, right_fit_average)
+
+    # print("HELLO")
+    direction = "TURN LEFT"
+    left_line = make_coordinates(image, left_fit_average, direction)
+
+    dir = "TURN RIGHT"
+    right_line = make_coordinates(image, right_fit_average, dir)
+    check = np.array([0, 0, 0, 0])
+    if ((not np.array_equal(right_fit_average, check)) and
+        (np.array_equal(left_fit_average, check))):
         print("STRAIGHT")
-    left_line = make_coordinates(image, left_fit_average)
-    right_line = make_coordinates(image, right_fit_average)
+
 
     # HAVE TO MAKE COMPATIBLE IF make_coordinates RETURNS A None
     # BETTER YET, WHY IS THERE AN ISSUE IN make_coordinates?
-    print("out of average_slope_intercept ... ")
-    print(left_line, right_line)
+    # print(left_line, right_line)
+    # print("out of average_slope_intercept ... ")
     return np.array([left_line, right_line])
 
 def canny(image):
@@ -97,8 +119,13 @@ def region_of_interest(image):
     height = image.shape[0]
 
     polygons = np.array([
-    [(100, height), (1000, height), (900, 0), (200, 0)]
+    [(100, height), (1000, height), (500, 0)]
     ])
+
+    # poorly conditioned polygon
+    # polygons = np.array([
+    # [(100, height), (1000, height), (900, 0), (200, 0)]
+    # ])
 
     # polygons = np.array([
     # [(0, height), (1000, height), (600, 100), (300, 100)]
