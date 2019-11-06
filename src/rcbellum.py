@@ -1,11 +1,6 @@
 # This is the  file that will get called
 
-# XXX: this will get info from rccortex.py
-# cerebellum controlls movement and coordination
-# this will communicate with the arduino that will either contorl the rc or car itself
 # source: https://pythonforundergradengineers.com/python-arduino-LED.html
-# XXX: NEED TO TAKE BETTER VIDEOS
-#  lanes must be centered, on a smooth background
 
 import cv2
 import numpy as np
@@ -155,16 +150,17 @@ def detect_lane_from_image(image, tesla):
 
 ###############################################################################
 def init_arduino():
-    ser1 = serial.Serial('COM8', 9600)
-    ser1.write('s', encode())
+    ser1 = serial.Serial('COM5', 9600)  # check com number
+
+    # while True:
+    # for i in range(30):
+    ser1.write('H'.encode())           # turns on the led
+    ser1.write('L'.encode())           # turns off the led
 
 ###############################################################################
 
 def main(tesla):
     print("Starting rcbellum.py ...")
-
-    init_arduino()
-
     # video = "video1.mp4"
     # video = "video2.mp4"  # DONT USE THIS ONE
     # video = "croppedvideo3.mp4"
@@ -202,4 +198,5 @@ def main(tesla):
 
 if __name__ == '__main__':
     tesla = Tesla()
-    main(tesla)
+    # main(tesla)
+    init_arduino()
