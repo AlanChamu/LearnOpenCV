@@ -28,11 +28,11 @@ def make_coordinates(image, line_parameters, direction):
         x2 = int((y2 - intercept)/slope)
         # print("array,", [x1, y1, x2, y2])
         # print("STRAIGHT")
-        return np.array([x1, y1, x2, y2])
+        return np.array([x1, y1, x2, y2]), False
     except Exception as exc:
         # print("Error in rccortex.make_coordinates():",exc)
         print(direction)
-        return np.array([0, 0, 0, 0])
+        return np.array([0, 0, 0, 0]), True
 
 def average_slope_intercept_helper(lines):
     left_fit, right_fit = [], []
@@ -45,17 +45,6 @@ def average_slope_intercept_helper(lines):
         parameters = np.polyfit((x1, x2), (y1, y2), 1)
         # print("PARAMETERS:", parameters)
 
-        # doesnt work
-        # for r, theta in parameters:
-        #     print(r, theta)
-        #     a = np.cos(theta)
-        #     b = np.sin(theta)
-        #
-        #     x0 = a*r
-        #     y0 = b*r
-        #
-        #     print(a, b, x0, y0)
-
         slope = parameters[0]
         intercept = parameters[1]
 
@@ -66,8 +55,6 @@ def average_slope_intercept_helper(lines):
 
     # print("Out of helper")
     return left_fit, right_fit
-
-
 
 def average_slope_intercept(image, lines):
     # print("In average_slope_intercept ... ")
@@ -81,27 +68,28 @@ def average_slope_intercept(image, lines):
 
     right_fit_average = np.average(right_fit, axis=0)
 
-    # major key, turn detection
-    # works!
-    # print(left_fit_average, right_fit_average)
+    path1 = "LEFT"
+    left_line, left_flag = make_coordinates(image, left_fit_average, path1)
 
-    # print("HELLO")
-    direction = "TURN LEFT"
-    left_line = make_coordinates(image, left_fit_average, direction)
+    path2 = "RIGHT"
+    right_line, right_flag = make_coordinates(image, right_fit_average, path2)
 
-    dir = "TURN RIGHT"
-    right_line = make_coordinates(image, right_fit_average, dir)
+    path = "FORWARD"
     check = np.array([0, 0, 0, 0])
     if ((not np.array_equal(right_fit_average, check)) and
         (np.array_equal(left_fit_average, check))):
-        print("STRAIGHT")
+        print(path)
 
+    if (left_flag):
+        path = "LEFT"
+    elif (right_flag):
+        path = "RIGHT"
+    # else:
+        # print("SOMETHING ELSE HERE!")
 
-    # HAVE TO MAKE COMPATIBLE IF make_coordinates RETURNS A None
-    # BETTER YET, WHY IS THERE AN ISSUE IN make_coordinates?
     # print(left_line, right_line)
     # print("out of average_slope_intercept ... ")
-    return np.array([left_line, right_line])
+    return np.array([left_line, right_line]), path
 
 def canny(image):
     #create a greyscale image
@@ -146,6 +134,7 @@ def display_lines(image, lines, color): # color is a three int tuple
             # specify where you want it to be drawn, and color
     return line_image
 
+# NOT USED, easier to get direction from average_slope_intercept()
 def get_middle_line(lines):
     print("In get_middle_line,")
     top = []

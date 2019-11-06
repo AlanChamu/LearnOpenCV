@@ -12,57 +12,19 @@ import matplotlib.pyplot as plt
 
 import sys, os # to get exception line number
 
-# state will be the cars current state (up, stop, left, right)
-def handle_stop(state):
-    print("IN handle_stop")
+dir_dict = \
+  { "FORWARD"  : ( 0, 1),
+    "LEFT"      : (-1, 1),
+    "RIGHT"     : ( 1, 1)}
 
-    cv2.imshow("Result", state)
-    cv2.waitKey(0)
-    if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-        cv2.destroyAllWindows()
-
-
-def handle_traffic(state):
-    print("IN handle_traffic")
-
-    cv2.imshow("Result", state)
-    cv2.waitKey(0)
-    if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-        cv2.destroyAllWindows()
-
-
-foo = {'stop sign':handle_stop,
-        'traffic light': handle_traffic}
-
-###############################################################################
-def drive_forward():
-    print("Starting drive_forwards() ... ")
-    # NEEDS TO BE CONNECTED TO ARDUINO HERE I GUESS
-def drive_left(tesla):
-    pass
-# might merge these two
-def drive_right(tesla):
-    pass
-###############################################################################
 def update_direction(tesla, path):
     dirx, diry = tesla.get_direction()
-    print("Direction=", dirx, diry)
+    print(tesla)
 
-    left = path[0]
-    right = path[1]
-    # will have to do some kind of math here
-    # x = Acos(O)
-    # y = Asin(0)
-
-    # XXX: NEED TO DETECT A TURN!
-    # if (turn):
-    #     drive_newdirection()
-    # else:
-    #     drive_forward()
-
-    newdirx, newdiry = dirx, diry
+    newdirx, newdiry = dir_dict[path]
 
     tesla.set_direction(newdirx, newdiry)
+    print(tesla)
 
 def get_path(averaged_lines):
     middle_line = []
@@ -88,11 +50,12 @@ def analyze_view(frame, previous):
     #     100, np.array([]), minLineLength=100, maxLineGap=100)
 
     # print("LINES:", lines)
-    averaged_lines = rccortex.average_slope_intercept(frame, lines)
+    averaged_lines, path = rccortex.average_slope_intercept(frame, lines)
     # averaged_lines = rccortex.average_slope_intercept(frame, np.array(lines[0], lines[1]))
-    previous =  averaged_lines
-    return averaged_lines
-# ######################################################################
+    # previous =  averaged_lines
+    return averaged_lines, path
+
+#######################################################################
 def detect_lane_from_video(video, tesla, detect=False):
 
     previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
@@ -107,12 +70,12 @@ def detect_lane_from_video(video, tesla, detect=False):
         #     break
         # previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
         # temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
-        averaged_lines = analyze_view(frame, previous)
+        averaged_lines, path = analyze_view(frame, previous)
         # print("averaged_lines:", averaged_lines)
         #################### major key ################################
         # print("five")
         # path = get_path(averaged_lines)
-        # update_direction(tesla, path)
+        update_direction(tesla, path)
         ##################################################################
         # line_image = rccortex.display_lines(frame, path, (0, 255, 0))
         # print("six")
@@ -198,5 +161,5 @@ def main(tesla):
 
 if __name__ == '__main__':
     tesla = Tesla()
-    # main(tesla)
-    init_arduino()
+    # init_arduino()
+    main(tesla)

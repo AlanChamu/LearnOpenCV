@@ -3,6 +3,8 @@
 '''
 this will contain the actual neural network,
 this will teach itself how to drive ...
+
+what does this mean tho
 '''
 
 # LEARN HOW TO MAKE A NEURAL NETWORK AND TRAIN IT
@@ -16,16 +18,13 @@ class Tesla(object):
         self.posx = 0
         self.posy = 0
         # kind of like x, y coordinates
-        # y  = 0 STOP -2 -1 reverse, 1 2 forwards,
         # x  = 0 STRAIGHT, -2 -1 left, 1 2 right
-        self.current_direction = (1, 0)
+        # y  = 0 STOP -2 -1 reverse, 1 2 forwards,
+        self.current_direction = (0, 0)
 
     # return as a string
     def __str__(self):
         return 'Dir='+str(self.current_direction)
-    # return as a dictionary
-    def __repr__(self):
-        pass
 
     def get_pos(self):
         return (self.posx, self.posy)
