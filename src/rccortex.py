@@ -35,6 +35,8 @@ def make_coordinates(image, line_parameters, direction):
         return np.array([0, 0, 0, 0]), True
 
 def average_slope_intercept_helper(lines):
+    # print("In average_slope_intercept_helper()...")
+
     left_fit, right_fit = [], []
 
     for line in lines:
@@ -53,17 +55,16 @@ def average_slope_intercept_helper(lines):
         else:
             right_fit.append((slope, intercept))
 
-    # print("Out of helper")
+    # print("Out of average_slope_intercept_helper()...")
     return left_fit, right_fit
 
 def average_slope_intercept(image, lines):
-    # print("In average_slope_intercept ... ")
+    # print("In average_slope_intercept", lines)
     left_fit, right_fit = [], []
 
-    # try:
+    # causes a polyfit error
     left_fit, right_fit = average_slope_intercept_helper(lines)
-    # except Exception as exc:
-    #     print("Error in rccortex.average_slope_intercept():", exc)
+
     left_fit_average = np.average(left_fit, axis=0)
 
     right_fit_average = np.average(right_fit, axis=0)
@@ -98,7 +99,9 @@ def canny(image):
     blur = cv2.GaussianBlur(gray, (5, 5), 0) # to reduce noise
     # Step 3: detect lanes, figure out what Canny method does
     # canny applies a 5by5 GaussianBlur either way
-    result = cv2.Canny(blur, 50, 200) # low to high threshold
+
+    # 2nd and 3rd arguements are the min and max values for the canny function
+    result = cv2.Canny(blur, 50, 50) # low to high threshold
     return result
 
 # focuses HoughLinesP into a certain area in the mp4 file,
@@ -106,18 +109,19 @@ def canny(image):
 def region_of_interest(image):
     height = image.shape[0]
 
-    polygons = np.array([
-    [(100, height), (1000, height), (500, 0)]
-    ])
+    # polygons = np.array([
+    # [(100, height), (1000, height), (500, 0)]
+    # ])
 
     # poorly conditioned polygon
     # polygons = np.array([
     # [(100, height), (1000, height), (900, 0), (200, 0)]
     # ])
 
-    # polygons = np.array([
-    # [(0, height), (1000, height), (600, 100), (300, 100)]
-    # ])
+    # for video1.mp4
+    polygons = np.array([
+    [(300, height), (1000, height), (600, 100)]
+    ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)

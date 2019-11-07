@@ -1,20 +1,19 @@
 // source:
 // https://github.com/hamuchiwa/AutoRCCar/blob/master/arduino/rc_keyboard_control.ino
 
-int command = 1; // go forwards by default, may change latter
+int command;
 
 // may change to fit schematic
 // these are the pin numbers, that the arduino has connected to the car
-int forward = 1;
-int reverse = 2;
-int left    = 3;
-int right   = 4;
+int forward = 9;
+int reverse = 10;
+int left    = 11;
+int right   = 12;
 
 // duration for output
 int time = 50;
 
-void setup()
-{
+void setup() {
   // initialize values for forwards, back, left, right
   // pinMode(LED_BUILTIN, OUTPUT);
   pinMode(forward, OUTPUT);
@@ -25,8 +24,7 @@ void setup()
   Serial.begin(9600);
 }
 
-void loop()
-{
+void loop() {
   // see if there's incoming serial data: receive command
   if (Serial.available() > 0) {
     // read the oldest byte in the serial buffer:
@@ -40,22 +38,48 @@ void loop()
   drive_car(command, time);
 }
 
-void reset()
-{
+void reset() {
     digitalWrite(forward, HIGH);
     digitalWrite(reverse, HIGH);
     digitalWrite(left, HIGH);
     digitalWrite(right, HIGH);
 }
 
+////////// driving functions //////////////////////////
+void hit_the_gas(int time) {
+    // why is this getting set to low?
+    digitalWrite(forward, LOW);
+    delay(time);
+}
 
-void drive_car(int command, int time)
-{
+void go_reverse(int time) {
+    digitalWrite(reverse, LOW);
+    delay(time);
+}
+
+void steer_left(int time) {
+    digitalWrite(foward, LOW);
+    digitalWrite(left, LOW);
+    delay(time);
+}
+
+void steer_right(int time) {
+    digitalWrite(foward, LOW);
+    digitalWrite(right, LOW);
+    delay(time);
+}
+////////// end of driving functions ///////////////////
+
+void drive_car(int command, int time) {
   switch (command) {
-      case 0: reset(); break;
-
+      case 0: reset(); break;   // hit the break
       // single commands
-      case 1: 
+      case 1: hit_the_gas(time); break;
+      case 2: go_reverse(time); break;
+
+      // combination commands
+      case 3: steer_left(time); break;
+      case 4: steer_left(time); break;
 
       default: Serial.print("Invalid Command");
       // this wont get printed unless its connected to laptop or display

@@ -12,22 +12,41 @@ import matplotlib.pyplot as plt
 
 import sys, os # to get exception line number
 
-dir_dict = \
-  { "FORWARD"   : ( 0, 1),  # straight forward
-    "BACKWARD"  : (-1, 0), # straight back
-    "LEFT"      : (-1, 1),  # forward left
-    "RIGHT"     : ( 1, 1)}  # forward right
+###############################################################################
 
-def update_direction(tesla, path):
+dir_dict = \
+  { "FORWARD"   : ( 0, 1, 1),  # straight forward
+    "BACKWARD"  : (-1, 0, 2), # straight back
+    "LEFT"      : (-1, 1, 3),  # forward left
+    "RIGHT"     : ( 1, 1, 4)}  # forward right
+
+def init_arduino(connected):
+    uno = None
+
+    if (connected):
+        uno = serial.Serial('COM5', 9600)  # check com number
+
+    # uno.write('H'.encode())            # turns on the led
+    # uno.write('L'.encode())          # turns off the led
+
+    return uno
+
+def update_direction(tesla, path, uno=None):
     dirx, diry = tesla.get_direction()
     print(tesla)
 
-    newdirx, newdiry = dir_dict[path]
-
+    newdirx, newdiry, arduino_instruction = dir_dict[path]
+    ################################################################
+    # tesla object doesnt really need to know the arduino instruction, it would be nice tho
+    # send turn instruction to arduino
+    if (uno is not None):
+        uno.write(arduino_instruction.encode())
+    ################################################################
     tesla.set_direction(newdirx, newdiry)
     print(tesla)
 
-def get_path(averaged_lines):
+###############################################################################
+def get_path(averaged_lines):   # NOT USED
     middle_line = []
     try:
         middle_line = rccortex.get_middle_line(averaged_lines)
@@ -35,57 +54,47 @@ def get_path(averaged_lines):
         print("Error in rcbellum.get_path():", exc)
     return middle_line
 
-def analyze_view(frame):
+def analyze_view(frame):        # VITAL
     cannyimg = rccortex.canny(frame)
-    # print("two")
-    cropped_image = rccortex.region_of_interest(cannyimg)
-    # return cropped_image
-    # print("three")
-    # lines = cv2.HoughLinesP(cropped_image, 1, np.pi/180, 100,
-    #     np.array([]), minLineLength=5, maxLineGap=5)
-    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
-            np.array([]), minLineLength=10, maxLineGap=10) # works with one middle line
-    # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-    #         100, np.array([]), minLineLength=50, maxLineGap=50)
-    # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180,
-    #     100, np.array([]), minLineLength=100, maxLineGap=100)
 
-    # print("LINES:", lines)
+    cropped_image = rccortex.region_of_interest(cannyimg)
+    # return cropped_image, None
+    # for video1.mp4
+    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
+            np.array([]), minLineLength=100, maxLineGap=5) # works with one middle line
+    # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
+    #         np.array([]), minLineLength=10, maxLineGap=10) # works with one middle line
+
     averaged_lines, path = rccortex.average_slope_intercept(frame, lines)
-    # averaged_lines = rccortex.average_slope_intercept(frame, np.array(lines[0], lines[1]))
+    # path is which direction to go, as a str
     return averaged_lines, path
 
 #######################################################################
-def detect_lane_from_video(video, tesla, detect=False):
-
-    # previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
+def detect_lane_from_video(video, tesla, uno=None, detect=False):
 
     cap = cv2.VideoCapture("../../videos/"+video)
 
     while (cap.isOpened()):
         _, frame = cap.read()
-        # print("one")
         # if (detect):
         #     rccortex.detect_objects(cap, video)
         #     break
-        # previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
-        # temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
         averaged_lines, path = analyze_view(frame)
-        # print("averaged_lines:", averaged_lines)
+        # cv2.imshow("Ampeater View/", averaged_lines)
+        # plt.imshow(averaged_lines)
+        # plt.show()
+
+        # print("HELLO")
         #################### major key ################################
-        # print("five")
-        # path = get_path(averaged_lines)
-        update_direction(tesla, path)
+        update_direction(tesla, path, uno)
         ##################################################################
-        # line_image = rccortex.display_lines(frame, path, (0, 255, 0))
-        # print("six")
         line_image = rccortex.display_lines(frame, averaged_lines, (0, 255, 0))
-        # print("seven")
+
         combo_img = cv2.addWeighted(frame, 0.8, line_image, 1, 1) # gamma value at end
-        # print("eight")
 
         cv2.imshow("Ampeater View", combo_img)
-        # plt.imshow(combo_img)
+
+        plt.imshow(combo_img)
         # plt.show()
 
         if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
@@ -94,37 +103,26 @@ def detect_lane_from_video(video, tesla, detect=False):
     cap.release()
     cv2.destroyAllWindows()
 
-def detect_lane_from_image(image, tesla):
-    # previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
+def detect_lane_from_image(image, tesla, uno):
 
     img = cv2.imread("../../pics/"+image, 1)
 
-    averaged_lines = analyze_view(img)
-    # print("one")
+    averaged_lines, path = analyze_view(img)
+    #  path is which direction to go, as a str
+
     line_image = rccortex.display_lines(img, averaged_lines, (0, 255, 0))
-    # print("two")
+
     combo_img = cv2.addWeighted(img, 0.8, line_image, 1, 1) # gamma value at end
-    # print("three")
+
     cv2.imshow("Ampeater View", combo_img)
     # plt.imshow(img)
     # plt.show()
     if cv2.waitKey(0) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
         cv2.destroyAllWindows()
 
-###############################################################################
-def init_arduino():
-    ser1 = serial.Serial('COM5', 9600)  # check com number
-
-    # while True:
-    # for i in range(30):
-    ser1.write('H'.encode())           # turns on the led
-    ser1.write('L'.encode())           # turns off the led
-
-###############################################################################
-
-def main(tesla):
+def main(tesla, uno):
     print("Starting rcbellum.py ...")
-    # video = "video1.mp4"
+    video = "video1.mp4"
     # video = "video2.mp4"  # DONT USE THIS ONE
     # video = "croppedvideo3.mp4"
     # video = "video4.mp4"
@@ -136,9 +134,9 @@ def main(tesla):
     # video = "custom6.mp4"
     # video = "custom7.mp4"
     # video = "croppedcustom7.mp4"
-    # video = "croppedcustom8.mp4"
+    # video = "croppedcustom8.mp4"  # BAD VIDEO, NEEDS A CLEAR BACKGROUND
     # video = "croppedcustom10.mp4"
-    video = "croppedcustom11.mp4"
+    # video = "croppedcustom11.mp4"
     # video = "croppedcustom12.mp4"
 
     # img = "lanes1.jpg"
@@ -148,7 +146,7 @@ def main(tesla):
 
     try:
         # detect_lane_from_image(img, tesla)
-        detect_lane_from_video(video, tesla)
+        detect_lane_from_video(video, tesla, uno)
         # detect_lane_from_video(video, tesla, True)
     except Exception as exc:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -160,6 +158,9 @@ def main(tesla):
         print("Goodbye, Thank You!")
 
 if __name__ == '__main__':
-    tesla = Tesla()
-    # init_arduino()
-    main(tesla)
+    tesla = Tesla() # would like to add serial object into Tesla
+
+    connected = False
+    uno = init_arduino(connected)
+
+    main(tesla, uno)
