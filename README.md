@@ -1,26 +1,23 @@
-# Learn OpenCV
-
+# Car Eyes
 
 ## Before
 ![Lane Before](src/test2.JPG)
-
+    
 ## After
 ![Lane_After](src/test2wlanes.jpg)
 
 ### Dependencies
-
-#### Core
 ```
-pip install cv2     # computer vision library
-pip install numpy   # support for large, multi-dimensional arrays
-```
-
-#### Additional
-```
-pip install pyserial    # communication with arduino
-pip install matplotlib  # to get numerical value for coordinates
+# Lane Detection
+pip install cv2         # computer vision library
+pip install numpy       # support for large, multi-dimensional arrays
+# Image Detection
 pip install cvlib       # for object detection
 pip install tensorflow  # required for cvlib
+# RC Control Unit
+pip install pyserial    # communication with Arduino
+# Other
+pip install matplotlib  # to get numerical value for coordinates
 ```
 
 <!-- diagram of how the auto rc will work  -->
@@ -32,6 +29,9 @@ pip install tensorflow  # required for cvlib
 (rccortex.py)
 * rc control unit   (part of this repo - pyserial to send signals to arduino)
 (rcbellum.py)
+
+# Potential Issues
+
 
 # Other
 * use ezgif.com/resize-video to resize videos: 1000 x 720

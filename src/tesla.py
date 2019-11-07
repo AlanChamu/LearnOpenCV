@@ -1,11 +1,13 @@
-
-
 '''
-this will contain the actual neural network,
-this will teach itself how to drive ...
-
-what does this mean tho
+This will contain the actual neural network,
+This will teach itself how to drive ...
+    what does this mean?
+    This means a couple things
+1. we WONT HARD CODE any rules into the car, it will learn the rules with our help (supervised learning)
+2. 
 '''
+
+import cv2      # for NN
 
 # LEARN HOW TO MAKE A NEURAL NETWORK AND TRAIN IT
 

@@ -5,17 +5,18 @@
 import cv2
 import numpy as np
 import rccortex
-import serial   # serial imported for serial communication
-import time     # required to use delay functions
-from tesla import *    # the nn
+import serial           # serial imported for serial communication
+import time             # required to use delay functions
+from tesla import *     # the nn
 import matplotlib.pyplot as plt
 
 import sys, os # to get exception line number
 
 dir_dict = \
-  { "FORWARD"  : ( 0, 1),
-    "LEFT"      : (-1, 1),
-    "RIGHT"     : ( 1, 1)}
+  { "FORWARD"   : ( 0, 1),  # straight forward
+    "BACKWARD"  : (-1, 0), # straight back
+    "LEFT"      : (-1, 1),  # forward left
+    "RIGHT"     : ( 1, 1)}  # forward right
 
 def update_direction(tesla, path):
     dirx, diry = tesla.get_direction()
@@ -34,7 +35,7 @@ def get_path(averaged_lines):
         print("Error in rcbellum.get_path():", exc)
     return middle_line
 
-def analyze_view(frame, previous):
+def analyze_view(frame):
     cannyimg = rccortex.canny(frame)
     # print("two")
     cropped_image = rccortex.region_of_interest(cannyimg)
@@ -52,13 +53,12 @@ def analyze_view(frame, previous):
     # print("LINES:", lines)
     averaged_lines, path = rccortex.average_slope_intercept(frame, lines)
     # averaged_lines = rccortex.average_slope_intercept(frame, np.array(lines[0], lines[1]))
-    # previous =  averaged_lines
     return averaged_lines, path
 
 #######################################################################
 def detect_lane_from_video(video, tesla, detect=False):
 
-    previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
+    # previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
 
     cap = cv2.VideoCapture("../../videos/"+video)
 
@@ -70,7 +70,7 @@ def detect_lane_from_video(video, tesla, detect=False):
         #     break
         # previous = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
         # temp = [np.zeros(4, dtype=int), np.zeros(4, dtype=int)]
-        averaged_lines, path = analyze_view(frame, previous)
+        averaged_lines, path = analyze_view(frame)
         # print("averaged_lines:", averaged_lines)
         #################### major key ################################
         # print("five")
@@ -95,11 +95,11 @@ def detect_lane_from_video(video, tesla, detect=False):
     cv2.destroyAllWindows()
 
 def detect_lane_from_image(image, tesla):
-    previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
+    # previous = np.array([np.array(np.zeros(4, int)) , np.array(np.zeros(4, int))])
 
     img = cv2.imread("../../pics/"+image, 1)
 
-    averaged_lines = analyze_view(img, previous)
+    averaged_lines = analyze_view(img)
     # print("one")
     line_image = rccortex.display_lines(img, averaged_lines, (0, 255, 0))
     # print("two")
