@@ -1,14 +1,22 @@
-// source:
+// source1:
 // https://github.com/hamuchiwa/AutoRCCar/blob/master/arduino/rc_keyboard_control.ino
+
+// source2: 
+// https://www.instructables.com/id/Hacking-a-RC-Car-With-Arduino-and-Android/
 
 int command;
 
+// there are 6 pins in total
+// R - L
+// B - F 
+// Vd - GND 
 // may change to fit schematic
 // these are the pin numbers, that the arduino has connected to the car
-int forward = 9;
-int reverse = 10;
-int left    = 11;
-int right   = 12;
+int forward = 9;    // rear motor - goes forward
+int reverse = 10;   // rear motor - goes back
+int left    = 11;   // front motor - goes left
+int right   = 12;   // front motor - goes right
+// dont think our project doesnt have front/rearMTEne
 
 // duration for output
 int time = 50;
@@ -26,15 +34,15 @@ void setup() {
 
 void loop() {
   // see if there's incoming serial data: receive command
-  if (Serial.available() > 0) {
-    // read the oldest byte in the serial buffer:
-    // gets command from the laptop, or pi
-    comamand = Serial.read();
-    // if it's a capital H (ASCII 72), turn on the LED:
-  } else {
-    reset(); // not a built-in function
-  }
-
+//  if (Serial.available() > 0) {
+//    // read the oldest byte in the serial buffer:
+//    // gets command from the laptop, or pi
+//    comamand = Serial.read();
+//    // if it's a capital H (ASCII 72), turn on the LED:
+//  } else {
+//    reset(); // not a built-in function
+//  }
+  command = 1;
   drive_car(command, time);
 }
 
@@ -47,13 +55,20 @@ void reset() {
 
 ////////// driving functions //////////////////////////
 void hit_the_gas(int time) {
-    // why is this getting set to low?
-    digitalWrite(forward, LOW);
+    digitalWrite(forward, HIGH);
+    digitalWrite(reverse, LOW);
+
+    // when we put in the led lights
+//    digitalWrite(ledRed, HIGH);
     delay(time);
 }
 
 void go_reverse(int time) {
-    digitalWrite(reverse, LOW);
+    digitalWrite(reverse, HIGH);
+    digitalWrite(forward, LOW);
+
+    // when we put in the led lights
+//    digitalWrite(ledRed, HIGH);
     delay(time);
 }
 

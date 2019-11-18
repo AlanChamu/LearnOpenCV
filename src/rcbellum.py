@@ -2,6 +2,8 @@
 
 # source: https://pythonforundergradengineers.com/python-arduino-LED.html
 
+import keras
+
 import cv2
 import numpy as np
 import rccortex
@@ -31,14 +33,14 @@ def init_arduino(connected):
 
     return uno
 
-def update_direction(tesla, path, uno=None):
+def update_direction(tesla, path, uno):
     dirx, diry = tesla.get_direction()
     print(tesla)
 
     newdirx, newdiry, arduino_instruction = dir_dict[path]
     ################################################################
     # tesla object doesnt really need to know the arduino instruction, it would be nice tho
-    # send turn instruction to arduino
+    # send turn instruction to arduino, not sure if this works, does work for strings tho
     if (uno is not None):
         uno.write(arduino_instruction.encode())
     ################################################################
@@ -58,7 +60,7 @@ def analyze_view(frame):        # VITAL
     cannyimg = rccortex.canny(frame)
 
     cropped_image = rccortex.region_of_interest(cannyimg)
-    # return cropped_image, None
+    return cropped_image, None
     # for video1.mp4
     lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100,
             np.array([]), minLineLength=100, maxLineGap=5) # works with one middle line
@@ -122,7 +124,7 @@ def detect_lane_from_image(image, tesla, uno):
 
 def main(tesla, uno):
     print("Starting rcbellum.py ...")
-    video = "video1.mp4"
+    # video = "video1.mp4"
     # video = "video2.mp4"  # DONT USE THIS ONE
     # video = "croppedvideo3.mp4"
     # video = "video4.mp4"
@@ -136,7 +138,7 @@ def main(tesla, uno):
     # video = "croppedcustom7.mp4"
     # video = "croppedcustom8.mp4"  # BAD VIDEO, NEEDS A CLEAR BACKGROUND
     # video = "croppedcustom10.mp4"
-    # video = "croppedcustom11.mp4"
+    video = "croppedcustom11.mp4"
     # video = "croppedcustom12.mp4"
 
     # img = "lanes1.jpg"

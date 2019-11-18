@@ -101,7 +101,7 @@ def canny(image):
     # canny applies a 5by5 GaussianBlur either way
 
     # 2nd and 3rd arguements are the min and max values for the canny function
-    result = cv2.Canny(blur, 50, 50) # low to high threshold
+    result = cv2.Canny(blur, 50, 100) # low to high threshold
     return result
 
 # focuses HoughLinesP into a certain area in the mp4 file,
@@ -114,14 +114,14 @@ def region_of_interest(image):
     # ])
 
     # poorly conditioned polygon
-    # polygons = np.array([
-    # [(100, height), (1000, height), (900, 0), (200, 0)]
-    # ])
+    polygons = np.array([
+    [(100, height), (1000, height), (900, 0), (200, 0)]
+    ])
 
     # for video1.mp4
-    polygons = np.array([
-    [(300, height), (1000, height), (600, 100)]
-    ])
+    # polygons = np.array([
+    # [(300, height), (1000, height), (600, 100)]
+    # ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
