@@ -109,11 +109,11 @@ def canny(image):
 def region_of_interest(image):
     height = image.shape[0]
 
+    # original video
     # polygons = np.array([
-    # [(100, height), (1000, height), (500, 0)]
+    # [(200, height), (1100, height), (550, 250)]
     # ])
 
-    # poorly conditioned polygon
     polygons = np.array([
     [(100, height), (1000, height), (900, 0), (200, 0)]
     ])
@@ -132,7 +132,8 @@ def region_of_interest(image):
 def display_lines(image, lines, color): # color is a three int tuple
     line_image = np.zeros_like(image)
     if lines is not None:
-        for x1, y1, x2, y2 in lines:
+        for  line in lines:
+            x1, y1, x2, y2 = line.reshape(4)
             # last equals line thickness, 2nd to last is color BGR
             cv2.line(line_image, (x1, y1), (x2, y2), color, 10)
             # specify where you want it to be drawn, and color

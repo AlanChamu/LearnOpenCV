@@ -1,5 +1,4 @@
 import sys
-# import h5py
 from keras.models import load_model
 from keras.datasets import mnist
 from numpy import loadtxt
@@ -9,9 +8,7 @@ from keras.utils import to_categorical
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-# x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
-# x_train /= 255  # colors?
 x_test /= 255   # colors?
 
 # print(x_train[0].shape)
