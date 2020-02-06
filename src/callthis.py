@@ -1,8 +1,3 @@
-# This is the  file that will get called
-
-# source: https://pythonforundergradengineers.com/python-arduino-LED.html
-
-
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
@@ -102,9 +97,6 @@ def detect_lane_from_video(tesla, uno=None, detect=False):
 #        cv2.imshow("Ampeater View", combo_img)
         cv2.imshow("Ampeater View", frame)
 
-        #plt.imshow(combo_img)
-        # plt.show()
-
         rawCapture.truncate(0)
 
         if cv2.waitKey(1) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
@@ -114,23 +106,6 @@ def detect_lane_from_video(tesla, uno=None, detect=False):
 
 def main(tesla, uno):
     print("Starting rcbellum.py ...")
-    # video = "video2.mp4"  # DONT USE THIS ONE
-    # video = "croppedvideo3.mp4"
-    # video = "video4.mp4"
-    # video = "video5.mp4"
-    # video = "custom2.mp4"
-    # video = "custom3.p4"
-    # video = "custom4.mp4" #DONT USE THIS ONE
-    # video = "custom5.mp4"
-    # video = "custom6.mp4"
-    # video = "custom7.mp4"
-    # video = "croppedcustom7.mp4"
-    # video = "croppedcustom8.mp4"  # BAD VIDEO, NEEDS A CLEAR BACKGROUND
-    # video = "croppedcustom10.mp4"
-    # video = "croppedcustom11.mp4"
-    # video = "croppedcustom12.mp4"
-
-    # img = "lanes1.jpg"
     try:
         # detect_lane_from_image(img, tesla)
         detect_lane_from_video(tesla, uno)
@@ -151,21 +126,3 @@ if __name__ == '__main__':
     uno = init_arduino(connected)
 
     main(tesla, uno)
-
-# USED FOR DEBUGGING
-# def detect_lane_from_image(image, tesla, uno):
-#
-#     img = cv2.imread("../../pics/"+image, 1)
-#
-#     averaged_lines, path = analyze_view(img)
-#     #  path is which direction to go, as a str
-#
-#     line_image = rccortex.display_lines(img, averaged_lines, (0, 255, 0))
-#
-#     combo_img = cv2.addWeighted(img, 0.8, line_image, 1, 1) # gamma value at end
-#
-#     cv2.imshow("Ampeater View", combo_img)
-#     # plt.imshow(img)
-#     # plt.show()
-#     if cv2.waitKey(0) == ord('q'): # waits 1 millisecond between frames (if 0, then video will freeze)
-#         cv2.destroyAllWindows()

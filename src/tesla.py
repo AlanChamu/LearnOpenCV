@@ -11,6 +11,12 @@ import cv2      # for NN
 
 # LEARN HOW TO MAKE A NEURAL NETWORK AND TRAIN IT
 
+dir_dict = \
+  { "FORWARD"   : ( 0, 1, 1),  # straight forward
+    "BACKWARD"  : (-1, 0, 2), # straight back
+    "LEFT"      : (-1, 1, 3),  # forward left
+    "RIGHT"     : ( 1, 1, 4)}  # forward right
+
 class Tesla(object):
     """docstring for Tesla."""
 
@@ -43,61 +49,38 @@ class Tesla(object):
         # send instructions to arduino
 
     # CAN I MAKE A FUNCTION THAT CAN DETECT TURNS?
+    # yes
 
     def __nn__(self):
         pass
         # for future alan, the one who knows how to make a nn and train it
 
-#
-# import keras
-# from keras.datasets import mnist
-# from keras.utils import to_categorical
-# from keras.models import Sequential
-# from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
-# from keras.preprocessing.image import ImageDataGenerator
-#
-# (x_train, y_train), (x_test, y_test) = mnist.load_data()
-#
-# x_train = x_train.astype('float32')
-# x_test = x_test.astype('float32')
-# x_train /= 255  # colors?
-# x_test /= 255   # colors?
-#
-# print(x_train[0].shape)
-# print(x_test[0].shape)
-# # x_train.shape[0]
-# x_train = x_train.reshape(60000, 28, 28, 1)
-# x_test = x_test.reshape(10000, 28, 28, 1)
-# # x_test.shape[0]
-#
-# print(x_train)
-# print(x_test)
-# y_train = to_categorical(y_train, 10)
-# y_test = to_categorical(y_test, 10)
-#
-# model = Sequential() # easier one to use
-# # model = keras.models.load_model("model.h5")
-# model.add(Conv2D(filters=32, kernel_size=(5,5), activation='relu',
-#     input_shape=x_train.shape[1:]))
-# model.add(Conv2D(filters=32, kernel_size=(5,5), activation='relu'))
-# model.add(MaxPool2D(pool_size=(2, 2)))
-# model.add(Dropout(rate=0.25))
-# model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
-# model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
-# model.add(MaxPool2D(pool_size=(2, 2)))
-# model.add(Dropout(rate=0.25))
-# model.add(Flatten()) # tf
-# model.add(Dense(256, activation='relu'))
-# model.add(Dropout(rate=0.5))
-# model.add(Dense(10, activation='softmax'))
-#
-# model.compile(
-#     loss='categorical_crossentropy',
-#     optimizer='adam',
-#     metrics=['accuracy']
-# )
-#
-# model.fit(x_train[:20000], y_train[:20000],
-#     validation_data=(x_test, y_test), epochs=3)
-#
-# model.save("model.h5")
+# from rcbellum.py
+def update_direction(tesla, path, uno):
+    print("In update_direction(),", path)
+    dirx, diry = tesla.get_direction()
+    newdirx, newdiry, arduino_instruction = dir_dict[path]
+    ################################################################
+    # tesla object doesnt really need to know the arduino instruction, it would be nice
+    # send turn instruction to arduino, not sure if this works, does work for strings
+    if (uno is not None):
+        # ARDUINO INSTRUCTION IS AN INTEGRE FROM DIRECTION DICTIONARY
+        uno.write(arduino_instruction.encode()) # this is it!
+    ################################################################
+    tesla.set_direction(newdirx, newdiry)
+
+def eight_figure():
+    pass
+
+def circles():
+    pass
+
+def forwards_and_back():
+    pass
+
+def test_run(tesla, uno, command):
+    print("Starting Tesla.test_run() ... ")
+
+    forwards_and_back()
+    circles()
+    eight_figure()

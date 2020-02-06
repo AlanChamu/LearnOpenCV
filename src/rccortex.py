@@ -1,4 +1,4 @@
-# yolov3 https://pjreddie.com/darknet/yolo/
+#yolov3 https://pjreddie.com/darknet/yolo/
 # source: https://towardsdatascience.com/object-detection-with-less-than-10-lines-of-code-using-python-2d28eebc5b11
 #source: https://www.youtube.com/watch?v=eLTLtUVuuy4
 
@@ -10,50 +10,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math # nan value
 
-# for the nn
-# import tesla
-
 # for object detection
 import cvlib as cv
 from cvlib.object_detection import draw_bbox
-# https://pjreddie.com/darknet/yolo/
 
+# make coordinates from the average of lines
 def make_coordinates(image, line_parameters, direction):
-    # print("In make_coordinates,", image, line_parameters)
     try:
         slope, intercept = line_parameters
         y1 = image.shape[0]
         y2 = int(y1*(3/5))
         x1 = int((y1 - intercept)/slope)
         x2 = int((y2 - intercept)/slope)
-        # print("array,", [x1, y1, x2, y2])
-        # print("STRAIGHT")
         return np.array([x1, y1, x2, y2]), False
     except Exception as exc:
         # print("Error in rccortex.make_coordinates():",exc)
-        print(direction)
         return np.array([0, 0, 0, 0]), True
 
 def average_slope_intercept_helper(lines):
-    # print("In average_slope_intercept_helper()...")
-
+    #print("In average_slope_intercept_helper(),", lines)
     left_fit, right_fit = [], []
 
-    for line in lines:
-        # print("line:", line[0])
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0].reshape(4)
 
-        x1, y1, x2, y2 = line[0].reshape(4)
+            parameters = np.polyfit((x1, x2), (y1, y2), 1)
+            # print("PARAMETERS:", parameters)
 
-        parameters = np.polyfit((x1, x2), (y1, y2), 1)
-        # print("PARAMETERS:", parameters)
+            slope = parameters[0]
+            intercept = parameters[1]
 
-        slope = parameters[0]
-        intercept = parameters[1]
-
-        if slope < 0:
-            left_fit.append((slope, intercept))
-        else:
-            right_fit.append((slope, intercept))
+            if slope < 0:
+                left_fit.append((slope, intercept))
+            else:
+                right_fit.append((slope, intercept))
 
     # print("Out of average_slope_intercept_helper()...")
     return left_fit, right_fit
@@ -61,46 +52,25 @@ def average_slope_intercept_helper(lines):
 def average_slope_intercept(image, lines):
     # print("In average_slope_intercept", lines)
     left_fit, right_fit = [], []
-
-    # causes a polyfit error
     left_fit, right_fit = average_slope_intercept_helper(lines)
 
     left_fit_average = np.average(left_fit, axis=0)
-
     right_fit_average = np.average(right_fit, axis=0)
 
-    path1 = "LEFT"
-    left_line, left_flag = make_coordinates(image, left_fit_average, path1)
-
-    path2 = "RIGHT"
-    right_line, right_flag = make_coordinates(image, right_fit_average, path2)
+    left_line, left_flag = make_coordinates(image, left_fit_average, "LEFT")
+    right_line, right_flag = make_coordinates(image, right_fit_average, "RIGHT")
 
     path = "FORWARD"
-    check = np.array([0, 0, 0, 0])
-    if ((not np.array_equal(right_fit_average, check)) and
-        (np.array_equal(left_fit_average, check))):
-        print(path)
-
     if (left_flag):
         path = "LEFT"
     elif (right_flag):
         path = "RIGHT"
-    # else:
-        # print("SOMETHING ELSE HERE!")
 
-    # print(left_line, right_line)
-    # print("out of average_slope_intercept ... ")
     return np.array([left_line, right_line]), path
 
 def canny(image):
-    #create a greyscale image
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) #flag to turn gray
-    #GaussianBlur to REDUCE NOISE -> FOR MORE ACCURATE EDGE DETECTION
     blur = cv2.GaussianBlur(gray, (5, 5), 0) # to reduce noise
-    # Step 3: detect lanes, figure out what Canny method does
-    # canny applies a 5by5 GaussianBlur either way
-
-    # 2nd and 3rd arguements are the min and max values for the canny function
     result = cv2.Canny(blur, 50, 100) # low to high threshold
     return result
 
@@ -115,13 +85,8 @@ def region_of_interest(image):
     # ])
 
     polygons = np.array([
-    [(100, height), (1000, height), (900, 0), (200, 0)]
+    [(200, height), (800, height), (800, 0), (200, 0)]
     ])
-
-    # for video1.mp4
-    # polygons = np.array([
-    # [(300, height), (1000, height), (600, 100)]
-    # ])
 
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
