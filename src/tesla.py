@@ -8,6 +8,8 @@ This will teach itself how to drive ...
 '''
 
 import cv2      # for NN
+import serial   # just in case
+import time     # t0 test out communication b/w pi and uno
 
 # LEARN HOW TO MAKE A NEURAL NETWORK AND TRAIN IT
 
@@ -38,7 +40,7 @@ class Tesla(object):
         return (self.posx, self.posy)
 
     def get_direction(self):
-        return self.current_direction
+er of seconds execution to be su        return self.current_direction
 
     def set_pos(self, new_x, new_y):
         self.posx = new_x
@@ -69,18 +71,42 @@ def update_direction(tesla, path, uno):
     ################################################################
     tesla.set_direction(newdirx, newdiry)
 
-def eight_figure():
+def eight_figure(tesla, uno, command):
     pass
 
-def circles():
-    pass
+def circles(tesla, uno, command):
+    print("Starting circles() ... ")
+    
+    go = 1 
+    back = 2
+    left = 3
+    right = 4
+    
+    if uno is not None:
+        while True:
+            uno.write(go.encode())
+            uno.write(right.encode())
+            sleep(2)
+            uno.write(back.encode())
+            uno.write(left.encode())
+            sleep(1)
 
-def forwards_and_back():
-    pass
-
+def forwards_and_back(tesla, uno, command):
+    print("Starting forwards_and_back() ... ")
+    
+    go = 1 
+    back = 2
+    
+    if uno is not None:
+        while True:
+            uno.write(go.encode())
+            sleep(2)
+            uno.write(back.encode())
+            sleep(2)
+    
 def test_run(tesla, uno, command):
     print("Starting Tesla.test_run() ... ")
 
-    forwards_and_back()
-    circles()
-    eight_figure()
+    forwards_and_back(tesla, uno, command)
+    #circles(tesla, uno, command)
+    #eight_figure(tesla, uno, command)
